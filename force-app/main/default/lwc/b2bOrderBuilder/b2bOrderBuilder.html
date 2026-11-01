@@ -30,6 +30,16 @@
                     onchange={handleAccountChange}
                     required
                 ></lightning-combobox>
+
+                <template lwc:if={hasSelectedAccount}>
+                    <div class="account-terms-strip slds-box slds-box_xx-small slds-theme_shade slds-m-top_xx-small">
+                        <div class="account-terms-grid slds-text-body_small">
+                            <span><lightning-icon icon-name="utility:check" size="xx-small" class="terms-check-icon"></lightning-icon><strong>Terms:</strong> Net 30</span>
+                            <span><strong>Credit:</strong> Approved</span>
+                            <span><strong>FOB:</strong> Destination</span>
+                        </div>
+                    </div>
+                </template>
             </div>
 
             <template lwc:if={hasCartItems}>
@@ -74,12 +84,43 @@
                     ></lightning-textarea>
                 </div>
 
-                <div class="slds-box slds-box_x-small slds-theme_shade slds-m-bottom_medium">
-                    <div class="summary-row">
-                        <span class="slds-text-title_caps slds-text-color_weak">
-                            Summary ({totalLineCount} SKUs / {totalUnitsCount} Units)
+                <div class="slds-box slds-box_x-small slds-theme_shade slds-m-bottom_medium financial-summary-card">
+                    <div class="financial-line">
+                        <span class="slds-text-body_small slds-text-color_weak">
+                            Subtotal ({totalLineCount} SKUs / {totalUnitsCount} Units)
                         </span>
-                        <span class="slds-text-heading_small slds-text-title_bold">
+                        <span class="slds-text-body_small slds-text-title_bold">
+                            <lightning-formatted-number
+                                value={estimatedOrderTotal}
+                                format-style="currency"
+                                currency-code="USD"
+                            ></lightning-formatted-number>
+                        </span>
+                    </div>
+
+                    <div class="financial-line">
+                        <span class="slds-text-body_small slds-text-color_weak">
+                            Estimated Freight / Logistics
+                        </span>
+                        <span class="slds-text-body_small slds-text-color_success">
+                            Complimentary ($0.00)
+                        </span>
+                    </div>
+
+                    <div class="financial-line">
+                        <span class="slds-text-body_small slds-text-color_weak">
+                            Estimated Tax (B2B Certificate)
+                        </span>
+                        <span class="slds-text-body_small slds-text-color_weak">
+                            Exempt ($0.00)
+                        </span>
+                    </div>
+
+                    <div class="financial-line financial-line_total">
+                        <span class="slds-text-title_caps slds-text-title_bold">
+                            Total Order Value
+                        </span>
+                        <span class="slds-text-heading_small slds-text-title_bold total-highlight">
                             <lightning-formatted-number
                                 value={estimatedOrderTotal}
                                 format-style="currency"
@@ -114,9 +155,17 @@
                         <lightning-icon icon-name="standard:webcart" size="large" alternative-text="Empty Cart"></lightning-icon>
                     </div>
                     <h3 class="slds-text-heading_small slds-m-bottom_xx-small">Your B2B Order Cart is Empty</h3>
-                    <p class="slds-text-body_regular slds-text-color_weak">
+                    <p class="slds-text-body_regular slds-text-color_weak slds-m-bottom_medium">
                         Select &ldquo;Add to Order&rdquo; on any product in the Warehouse Inventory Catalog to begin building an order.
                     </p>
+                    <button
+                        type="button"
+                        class="slds-button slds-button_brand"
+                        onclick={handleNavigateToCatalog}
+                    >
+                        <lightning-icon icon-name="utility:search" size="x-small" class="slds-button__icon slds-button__icon_left cart-cta-icon"></lightning-icon>
+                        <span>Browse Warehouse Catalog</span>
+                    </button>
                 </div>
             </template>
         </div>

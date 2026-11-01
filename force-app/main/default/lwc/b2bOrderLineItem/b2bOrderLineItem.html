@@ -10,8 +10,9 @@
                     <span>Max Avail: {item.availableQuantity}</span>
                 </div>
                 <template lwc:if={hasStockError}>
-                    <div class="slds-text-color_error slds-text-body_small slds-m-top_xx-small">
-                        Exceeds available stock ({item.availableQuantity})
+                    <div class="slds-text-color_error slds-text-body_small slds-m-top_xx-small stock-alert">
+                        <lightning-icon icon-name="utility:warning" size="xx-small" variant="error" class="slds-m-right_xx-small"></lightning-icon>
+                        <span>Exceeds available stock ({item.availableQuantity} max)</span>
                     </div>
                 </template>
             </div>
@@ -32,6 +33,7 @@
                         min="1"
                         max={item.availableQuantity}
                         onchange={handleInputChange}
+                        onblur={handleInputBlur}
                         aria-label="Quantity"
                     />
                     <lightning-button-icon

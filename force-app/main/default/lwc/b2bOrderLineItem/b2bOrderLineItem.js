@@ -1,5 +1,9 @@
 import { LightningElement, api } from 'lwc';
 
+/**
+ * @description Child line item component for active order builder cards.
+ *              Encapsulates quantity stepping, real-time stock clamping, and dynamic line-total calculation.
+ */
 export default class B2bOrderLineItem extends LightningElement {
     @api item;
 
@@ -40,6 +44,17 @@ export default class B2bOrderLineItem extends LightningElement {
         this.emitQuantityChange(safeQty);
     }
 
+    handleInputBlur(event) {
+        let parsed = parseInt(event.target.value, 10);
+        if (Number.isNaN(parsed) || parsed < 1) {
+            parsed = 1;
+        } else if (this.item?.availableQuantity && parsed > this.item.availableQuantity) {
+            parsed = this.item.availableQuantity;
+        }
+        event.target.value = parsed;
+        this.emitQuantityChange(parsed);
+    }
+
     handleRemove() {
         this.dispatchEvent(
             new CustomEvent('removeitem', {
@@ -61,4 +76,3 @@ export default class B2bOrderLineItem extends LightningElement {
         );
     }
 }
-

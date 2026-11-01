@@ -6,6 +6,11 @@ import B2B_ORDER_CHANNEL from '@salesforce/messageChannel/B2B_Order_Channel__c';
 import getCustomerAccounts from '@salesforce/apex/B2BOrderConsoleController.getCustomerAccounts';
 import saveOrder from '@salesforce/apex/B2BOrderConsoleController.saveOrder';
 
+/**
+ * @description Interactive order construction component for B2B accounts.
+ *              Supports line item management, inventory stock guards, financial breakdown summaries,
+ *              and direct submission to ERP with asynchronous queueable fallbacks.
+ */
 export default class B2bOrderBuilder extends LightningElement {
     selectedAccountId = '';
     accountOptions = [];
@@ -134,6 +139,13 @@ export default class B2bOrderBuilder extends LightningElement {
         this.orderNotes = '';
     }
 
+    handleNavigateToCatalog() {
+        publish(this.messageContext, B2B_ORDER_CHANNEL, {
+            actionType: 'NAVIGATE_TAB',
+            payload: { tab: 'catalog' }
+        });
+    }
+
     async handleSaveDraft() {
         await this.persistOrder(false);
     }
@@ -208,6 +220,10 @@ export default class B2bOrderBuilder extends LightningElement {
         }
     }
 
+    get hasSelectedAccount() {
+        return Boolean(this.selectedAccountId);
+    }
+
     get hasCartItems() {
         return this.cartItems && this.cartItems.length > 0;
     }
@@ -258,4 +274,3 @@ export default class B2bOrderBuilder extends LightningElement {
         this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
     }
 }
-

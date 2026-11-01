@@ -48,6 +48,8 @@ export default class B2bOrderConsoleWorkspace extends LightningElement {
             if (this.activeMobileTab === 'cart') {
                 this.activeMobileTab = 'orders';
             }
+        } else if (message.actionType === 'NAVIGATE_TAB' && message.payload?.tab) {
+            this.activeMobileTab = message.payload.tab;
         }
     }
 
