@@ -20,14 +20,17 @@
                     </div>
                 </div>
                 <div class="badge-strip slds-m-top_x-small">
+                    <span class="slds-badge slds-theme_success erp-online-badge">
+                        <lightning-icon
+                            icon-name="utility:connected_apps"
+                            size="xx-small"
+                            class="slds-m-right_xx-small erp-online-icon"
+                        ></lightning-icon>
+                        ERP Live
+                    </span>
                     <lightning-badge
                         label="Apex Enterprise Patterns"
                         icon-name="utility:apex"
-                        class="slds-badge_lightest"
-                    ></lightning-badge>
-                    <lightning-badge
-                        label="Named Credential REST"
-                        icon-name="utility:connected_apps"
                         class="slds-badge_lightest"
                     ></lightning-badge>
                     <lightning-badge
@@ -109,15 +112,24 @@
 
                 <template lwc:if={showMobileCartPrompt}>
                     <div class="slds-box slds-box_xx-small slds-theme_info slds-m-top_x-small mobile-cart-banner">
-                        <span class="slds-text-body_small">
-                            <strong>{mobileCartCount} SKU(s)</strong> in Cart
-                        </span>
-                        <lightning-button
-                            label="Open Cart"
-                            variant="neutral"
+                        <div class="slds-media slds-media_center">
+                            <div class="slds-media__figure">
+                                <lightning-icon icon-name="utility:cart" size="x-small" variant="inverse"></lightning-icon>
+                            </div>
+                            <div class="slds-media__body">
+                                <span class="slds-text-body_small">
+                                    <strong>{mobileCartCount} SKU(s)</strong> added to active order
+                                </span>
+                            </div>
+                        </div>
+                        <button
+                            type="button"
+                            class="slds-button slds-button_neutral cart-banner-btn"
                             data-tab="cart"
                             onclick={handleMobileTabChange}
-                        ></lightning-button>
+                        >
+                            View Cart
+                        </button>
                     </div>
                 </template>
             </div>

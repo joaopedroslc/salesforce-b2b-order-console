@@ -4,13 +4,15 @@ import B2B_ORDER_CHANNEL from '@salesforce/messageChannel/B2B_Order_Channel__c';
 
 /**
  * @description Unified single-drop workspace container for Experience Cloud (LWR/Aura) and Lightning App Pages.
- *              Provides a side-by-side 2-column SLDS desktop workspace and a smooth-transitioning mobile switcher
- *              while keeping all child LWCs mounted in the DOM so LMS state is never lost.
+ *              Provides a side-by-side 2-column SLDS desktop workspace, interactive mobile tab navigation,
+ *              dynamic cart pulse micro-interactions, and real-time LMS message routing.
  */
 export default class B2bOrderConsoleWorkspace extends LightningElement {
     activeMobileTab = 'catalog';
     mobileCartSkus = new Set();
     lmsSubscription = null;
+    isCartPulsing = false;
+    pulseTimeout = null;
 
     @wire(MessageContext)
     messageContext;
@@ -24,6 +26,7 @@ export default class B2bOrderConsoleWorkspace extends LightningElement {
             unsubscribe(this.lmsSubscription);
             this.lmsSubscription = null;
         }
+        window.clearTimeout(this.pulseTimeout);
     }
 
     subscribeToLms() {
@@ -43,6 +46,7 @@ export default class B2bOrderConsoleWorkspace extends LightningElement {
         }
         if (message.actionType === 'ADD_TO_ORDER' && message.payload?.inventoryId) {
             this.mobileCartSkus = new Set([...this.mobileCartSkus, message.payload.inventoryId]);
+            this.triggerCartPulse();
         } else if (message.actionType === 'ORDER_UPDATED') {
             this.mobileCartSkus = new Set();
             if (this.activeMobileTab === 'cart') {
@@ -51,6 +55,14 @@ export default class B2bOrderConsoleWorkspace extends LightningElement {
         } else if (message.actionType === 'NAVIGATE_TAB' && message.payload?.tab) {
             this.activeMobileTab = message.payload.tab;
         }
+    }
+
+    triggerCartPulse() {
+        this.isCartPulsing = true;
+        window.clearTimeout(this.pulseTimeout);
+        this.pulseTimeout = window.setTimeout(() => {
+            this.isCartPulsing = false;
+        }, 650);
     }
 
     handleMobileTabChange(event) {
@@ -79,9 +91,14 @@ export default class B2bOrderConsoleWorkspace extends LightningElement {
     }
 
     get cartTabClass() {
-        return this.activeMobileTab === 'cart'
-            ? 'slds-button slds-button_brand mobile-tab-btn mobile-tab-btn_active'
-            : 'slds-button slds-button_neutral mobile-tab-btn';
+        let baseClass =
+            this.activeMobileTab === 'cart'
+                ? 'slds-button slds-button_brand mobile-tab-btn mobile-tab-btn_active'
+                : 'slds-button slds-button_neutral mobile-tab-btn';
+        if (this.isCartPulsing) {
+            baseClass += ' cart-tab-btn_pulse';
+        }
+        return baseClass;
     }
 
     get ordersTabClass() {
