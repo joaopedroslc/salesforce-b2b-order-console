@@ -1,0 +1,17 @@
+.line-item-card {
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 0.375rem;
+}
+
+.qty-input {
+    width: 4.2rem;
+    text-align: center;
+    padding: 0 0.25rem;
+}
+
+.stock-error-msg {
+    color: #ba0517;
+    font-size: 0.75rem;
+    font-weight: 600;
+}

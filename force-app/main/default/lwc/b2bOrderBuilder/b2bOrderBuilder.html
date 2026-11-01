@@ -1,0 +1,101 @@
+<template>
+    <lightning-card title="B2B Order Builder" icon-name="standard:orders">
+        <div slot="actions">
+            <template lwc:if={hasCartItems}>
+                <lightning-button
+                    label="Clear Cart"
+                    icon-name="utility:clear"
+                    onclick={handleClearCart}
+                    disabled={isSubmitting}
+                ></lightning-button>
+            </template>
+        </div>
+
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <!-- Customer Account Selector -->
+            <div class="slds-m-bottom_small">
+                <lightning-combobox
+                    name="customerAccount"
+                    label="B2B Customer Account"
+                    placeholder="Select Customer Account..."
+                    value={selectedAccountId}
+                    options={accountOptions}
+                    onchange={handleAccountChange}
+                    required
+                ></lightning-combobox>
+            </div>
+
+            <!-- Cart Line Items (Parent -> Child CustomEvents) -->
+            <template lwc:if={hasCartItems}>
+                <div class="cart-items-list slds-m-bottom_medium">
+                    <template for:each={cartItems} for:item="line">
+                        <c-b2b-order-line-item
+                            key={line.inventoryId}
+                            item={line}
+                            onquantitychange={handleLineQuantityChange}
+                            onremoveitem={handleRemoveLineItem}
+                        ></c-b2b-order-line-item>
+                    </template>
+                </div>
+
+                <!-- Order Notes -->
+                <div class="slds-m-bottom_medium">
+                    <lightning-textarea
+                        name="orderNotes"
+                        label="Fulfillment / Delivery Instructions"
+                        placeholder="Optional warehouse handling or dock instructions..."
+                        value={orderNotes}
+                        max-length="2000"
+                        onchange={handleNotesChange}
+                    ></lightning-textarea>
+                </div>
+
+                <!-- Order Summary Footer -->
+                <div class="summary-panel slds-p-around_small slds-m-bottom_medium">
+                    <div class="slds-grid slds-grid_align-spread slds-m-bottom_xx-small">
+                        <span class="slds-text-color_weak">Line Items ({totalLineCount} SKUs / {totalUnitsCount} Units)</span>
+                        <span class="slds-text-title_bold">
+                            <lightning-formatted-number
+                                value={estimatedOrderTotal}
+                                format-style="currency"
+                                currency-code="USD"
+                            ></lightning-formatted-number>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="slds-grid slds-grid_align-end slds-gutters_x-small">
+                    <div class="slds-col">
+                        <lightning-button
+                            label="Save as Draft"
+                            icon-name="utility:save"
+                            onclick={handleSaveDraft}
+                            disabled={isActionDisabled}
+                        ></lightning-button>
+                    </div>
+                    <div class="slds-col">
+                        <lightning-button
+                            variant="brand"
+                            label="Submit Order to ERP"
+                            icon-name="utility:send"
+                            onclick={handleSubmitOrder}
+                            disabled={isActionDisabled}
+                        ></lightning-button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Empty Cart Placeholder -->
+            <template lwc:else>
+                <div class="empty-cart slds-p-around_large slds-text-align_center">
+                    <lightning-icon icon-name="utility:cart" size="medium" class="slds-m-bottom_small"></lightning-icon>
+                    <h3 class="slds-text-heading_small slds-m-bottom_x-small">Your B2B Order Cart is Empty</h3>
+                    <p class="slds-text-color_weak">
+                        Select &ldquo;Add to Order&rdquo; on any product in the Warehouse Inventory Catalog to begin building an order.
+                    </p>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>
