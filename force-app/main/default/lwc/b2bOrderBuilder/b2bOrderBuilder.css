@@ -1,3 +1,29 @@
+:host {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+}
+
 .cart-max-height {
     max-height: 18rem;
+}
+
+.summary-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.builder-actions-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+}
+
+@media (min-width: 480px) {
+    .builder-actions-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }

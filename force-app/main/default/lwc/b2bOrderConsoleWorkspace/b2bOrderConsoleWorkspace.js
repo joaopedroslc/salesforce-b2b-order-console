@@ -88,31 +88,29 @@ export default class B2bOrderConsoleWorkspace extends LightningElement {
     }
 
     get catalogColumnClass() {
-        const base = 'slds-col slds-size_1-of-1 slds-large-size_7-of-12 slds-m-bottom_medium';
         if (this.activeMobileTab === 'catalog' || this.activeMobileTab === 'all') {
-            return base;
+            return 'workspace-col-left';
         }
-        return `${base} slds-show_large`;
+        return 'workspace-col-left mobile-pane-hidden';
     }
 
     get rightColumnClass() {
-        const base = 'slds-col slds-size_1-of-1 slds-large-size_5-of-12';
         if (this.activeMobileTab === 'catalog') {
-            return `${base} slds-show_large`;
+            return 'workspace-col-right mobile-pane-hidden';
         }
-        return base;
+        return 'workspace-col-right';
     }
 
     get builderWrapperClass() {
         if (this.activeMobileTab === 'orders') {
-            return 'slds-m-bottom_medium slds-show_large';
+            return 'slds-m-bottom_medium mobile-pane-hidden';
         }
         return 'slds-m-bottom_medium';
     }
 
     get trackerWrapperClass() {
         if (this.activeMobileTab === 'cart') {
-            return 'slds-show_large';
+            return 'mobile-pane-hidden';
         }
         return '';
     }

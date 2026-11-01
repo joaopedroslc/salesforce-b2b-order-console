@@ -52,9 +52,9 @@
 
                 <!-- SLDS Shaded Order Summary Box -->
                 <div class="slds-box slds-box_x-small slds-theme_shade slds-m-bottom_medium">
-                    <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                    <div class="summary-row">
                         <span class="slds-text-title_caps slds-text-color_weak">
-                            Order Summary ({totalLineCount} SKUs / {totalUnitsCount} Units)
+                            Summary ({totalLineCount} SKUs / {totalUnitsCount} Units)
                         </span>
                         <span class="slds-text-heading_small slds-text-title_bold">
                             <lightning-formatted-number
@@ -66,23 +66,23 @@
                     </div>
                 </div>
 
-                <!-- SLDS Button Group Actions -->
-                <div class="slds-grid slds-grid_align-end">
-                    <lightning-button-group>
-                        <lightning-button
-                            label="Save as Draft"
-                            icon-name="utility:save"
-                            onclick={handleSaveDraft}
-                            disabled={isActionDisabled}
-                        ></lightning-button>
-                        <lightning-button
-                            variant="brand"
-                            label="Submit Order to ERP"
-                            icon-name="utility:send"
-                            onclick={handleSubmitOrder}
-                            disabled={isActionDisabled}
-                        ></lightning-button>
-                    </lightning-button-group>
+                <!-- Responsive Action Buttons (Full-Width Grid on Mobile, Right-Aligned on Desktop) -->
+                <div class="builder-actions-grid">
+                    <lightning-button
+                        label="Save as Draft"
+                        icon-name="utility:save"
+                        stretch
+                        onclick={handleSaveDraft}
+                        disabled={isActionDisabled}
+                    ></lightning-button>
+                    <lightning-button
+                        variant="brand"
+                        label="Submit Order to ERP"
+                        icon-name="utility:send"
+                        stretch
+                        onclick={handleSubmitOrder}
+                        disabled={isActionDisabled}
+                    ></lightning-button>
                 </div>
             </template>
 

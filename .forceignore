@@ -12,3 +12,11 @@ package.xml
 **/__tests__/**
 
 node_modules/
+
+# Local screen recordings and media reviews
+screen recordings/
+**/screen recordings/**
+*.mp4
+*.mov
+*.webm
+

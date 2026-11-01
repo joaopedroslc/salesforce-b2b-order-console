@@ -1,89 +1,74 @@
 <template>
     <lightning-card title="B2B Inventory Catalog" icon-name="standard:product">
-        <div slot="actions">
-            <!-- Desktop Full Action Buttons -->
-            <div class="slds-show_medium">
-                <lightning-button-group>
-                    <lightning-button
-                        label="Seed Demo Data"
-                        icon-name="utility:database"
-                        onclick={handleSeedCatalog}
-                        disabled={isSyncing}
-                    ></lightning-button>
-                    <lightning-button
-                        variant="brand"
-                        label="Sync with ERP"
-                        icon-name="utility:sync"
-                        onclick={handleSyncErp}
-                        disabled={isSyncing}
-                    ></lightning-button>
-                </lightning-button-group>
-            </div>
-            <!-- Mobile Compact Action Buttons (Prevents horizontal overflow on narrow phones) -->
-            <div class="slds-hide_medium">
-                <div class="slds-button-group" role="group">
-                    <lightning-button-icon
-                        icon-name="utility:database"
-                        variant="border-filled"
-                        alternative-text="Seed Demo Data"
-                        title="Seed Demo Data"
-                        onclick={handleSeedCatalog}
-                        disabled={isSyncing}
-                    ></lightning-button-icon>
-                    <lightning-button
-                        variant="brand"
-                        label="ERP Sync"
-                        icon-name="utility:sync"
-                        onclick={handleSyncErp}
-                        disabled={isSyncing}
-                    ></lightning-button>
-                </div>
-            </div>
+        <!-- Desktop Header Actions (>= 768px) -->
+        <div slot="actions" class="desktop-only-view">
+            <lightning-button-group>
+                <lightning-button
+                    label="Seed Demo Data"
+                    icon-name="utility:database"
+                    onclick={handleSeedCatalog}
+                    disabled={isSyncing}
+                ></lightning-button>
+                <lightning-button
+                    variant="brand"
+                    label="Sync with ERP"
+                    icon-name="utility:sync"
+                    onclick={handleSyncErp}
+                    disabled={isSyncing}
+                ></lightning-button>
+            </lightning-button-group>
         </div>
 
-        <div class="slds-card__body slds-card__body_inner">
-            <!-- Native SLDS KPI Summary Strip (Responsive Mobile + Desktop) -->
-            <div class="slds-grid slds-wrap slds-gutters_xx-small slds-m-bottom_small">
-                <div class="slds-col slds-size_1-of-3">
-                    <div class="slds-box slds-box_x-small slds-theme_shade slds-text-align_center">
-                        <p class="slds-text-title_caps slds-text-color_weak slds-truncate" title="Active SKUs">
-                            SKUs
-                        </p>
-                        <p class="slds-text-heading_small slds-text-title_bold">{totalSkus}</p>
-                    </div>
+        <div class="slds-card__body slds-card__body_inner catalog-body">
+            <!-- Mobile Action Toolbar (< 768px): Keeps Card Title 100% Uncompressed -->
+            <div class="mobile-only-view mobile-action-toolbar slds-m-bottom_small">
+                <lightning-button
+                    label="Seed Data"
+                    icon-name="utility:database"
+                    stretch
+                    onclick={handleSeedCatalog}
+                    disabled={isSyncing}
+                ></lightning-button>
+                <lightning-button
+                    variant="brand"
+                    label="ERP Sync"
+                    icon-name="utility:sync"
+                    stretch
+                    onclick={handleSyncErp}
+                    disabled={isSyncing}
+                ></lightning-button>
+            </div>
+
+            <!-- Native SLDS KPI Summary Strip (Zero Truncation on Mobile & Desktop) -->
+            <div class="kpi-grid slds-m-bottom_small">
+                <div class="slds-box slds-box_x-small slds-theme_shade slds-text-align_center kpi-card">
+                    <p class="kpi-label slds-text-color_weak">SKUs</p>
+                    <p class="slds-text-heading_small slds-text-title_bold">{totalSkus}</p>
                 </div>
-                <div class="slds-col slds-size_1-of-3">
-                    <div class="slds-box slds-box_x-small slds-theme_shade slds-text-align_center">
-                        <p class="slds-text-title_caps slds-text-color_weak slds-truncate" title="Available Units">
-                            Available
-                        </p>
-                        <p class="slds-text-heading_small slds-text-title_bold">{totalAvailableUnits}</p>
-                    </div>
+                <div class="slds-box slds-box_x-small slds-theme_shade slds-text-align_center kpi-card">
+                    <p class="kpi-label slds-text-color_weak">Available</p>
+                    <p class="slds-text-heading_small slds-text-title_bold">{totalAvailableUnits}</p>
                 </div>
-                <div class="slds-col slds-size_1-of-3">
-                    <div class="slds-box slds-box_x-small slds-theme_shade slds-text-align_center">
-                        <p class="slds-text-title_caps slds-text-color_weak slds-truncate" title="Low / Out Alerts">
-                            Alerts
-                        </p>
-                        <p class="slds-text-heading_small slds-text-title_bold slds-text-color_error">
-                            {lowOrOutCount}
-                        </p>
-                    </div>
+                <div class="slds-box slds-box_x-small slds-theme_shade slds-text-align_center kpi-card">
+                    <p class="kpi-label slds-text-color_weak">Alerts</p>
+                    <p class="slds-text-heading_small slds-text-title_bold slds-text-color_error">
+                        {lowOrOutCount}
+                    </p>
                 </div>
             </div>
 
-            <!-- SLDS Search & Filter Grid (Stacks cleanly on Mobile) -->
-            <div class="slds-grid slds-wrap slds-gutters_x-small slds-m-bottom_small">
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_7-of-12 slds-m-bottom_x-small">
+            <!-- Search & Filter Controls -->
+            <div class="filter-grid slds-m-bottom_small">
+                <div>
                     <lightning-input
                         type="search"
                         label="Search Catalog"
                         variant="label-hidden"
-                        placeholder="Search by Product Name, Code, or External SKU..."
+                        placeholder="Search by Product, Code, or SKU..."
                         onchange={handleSearchChange}
                     ></lightning-input>
                 </div>
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-m-bottom_x-small">
+                <div>
                     <lightning-combobox
                         name="stockStatus"
                         label="Filter Stock Status"
@@ -106,7 +91,7 @@
 
             <template lwc:elseif={hasInventoryItems}>
                 <!-- DESKTOP & TABLET VIEW (>= 768px): High-Density SLDS Data Table -->
-                <div class="slds-show_medium slds-scrollable_y catalog-max-height">
+                <div class="desktop-only-view slds-scrollable_y catalog-max-height">
                     <table
                         class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped slds-table_col-bordered"
                         aria-label="B2B Warehouse Inventory Catalog"
@@ -165,21 +150,21 @@
                 </div>
 
                 <!-- MOBILE VIEW (< 768px): Touch-Optimized SLDS Product Cards -->
-                <div class="slds-hide_medium">
+                <div class="mobile-only-view">
                     <template for:each={inventoryItems} for:item="item">
                         <article
                             key={item.Id}
-                            class="slds-box slds-box_x-small slds-theme_default slds-m-bottom_small"
+                            class="slds-box slds-box_x-small slds-theme_default slds-m-bottom_small mobile-product-card"
                         >
-                            <!-- Top Row: SKU Badge + Stock Status Badge -->
-                            <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-m-bottom_xx-small">
+                            <!-- Row 1: SKU Badge + Stock Status Badge -->
+                            <div class="card-top-row slds-m-bottom_xx-small">
                                 <span class="slds-badge slds-badge_lightest">{item.External_SKU__c}</span>
                                 <span class={item.sldsBadgeClass}>{item.Stock_Status__c}</span>
                             </div>
 
-                            <!-- Full-Width Product Title & Family -->
+                            <!-- Row 2: Full-Width Product Title & Family -->
                             <div class="slds-m-bottom_x-small">
-                                <h3 class="slds-text-title_bold" title={item.productName}>
+                                <h3 class="slds-text-title_bold product-card-title">
                                     {item.productName}
                                 </h3>
                                 <p class="slds-text-body_small slds-text-color_weak">
@@ -187,11 +172,11 @@
                                 </p>
                             </div>
 
-                            <!-- Card Metrics Strip: Unit Price | On Hand / Reserved | Available -->
+                            <!-- Row 3: 3-Column Metric Box (Single-Line Labels, Zero Vertical Wrapping) -->
                             <div class="slds-box slds-box_xx-small slds-theme_shade slds-m-bottom_x-small">
-                                <div class="slds-grid slds-text-align_center">
-                                    <div class="slds-col slds-size_1-of-3">
-                                        <div class="slds-text-body_small slds-text-color_weak">Unit Price</div>
+                                <div class="card-metrics-grid slds-text-align_center">
+                                    <div class="metric-cell">
+                                        <div class="metric-caption slds-text-color_weak">Unit Price</div>
                                         <div class="slds-text-title_bold">
                                             <lightning-formatted-number
                                                 value={item.Unit_Price__c}
@@ -200,21 +185,21 @@
                                             ></lightning-formatted-number>
                                         </div>
                                     </div>
-                                    <div class="slds-col slds-size_1-of-3 slds-border_left slds-border_right">
-                                        <div class="slds-text-body_small slds-text-color_weak">On Hand / Res</div>
-                                        <div class="slds-text-body_regular">
+                                    <div class="metric-cell slds-border_left slds-border_right">
+                                        <div class="metric-caption slds-text-color_weak">OH / Res</div>
+                                        <div class="slds-text-body_regular metric-nowrap">
                                             {item.On_Hand_Quantity__c} / {item.Reserved_Quantity__c}
                                         </div>
                                     </div>
-                                    <div class="slds-col slds-size_1-of-3">
-                                        <div class="slds-text-body_small slds-text-color_weak">Available</div>
+                                    <div class="metric-cell">
+                                        <div class="metric-caption slds-text-color_weak">Available</div>
                                         <div class="slds-text-title_bold">{item.Available_Quantity__c}</div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Touch-Friendly Action Row -->
-                            <div class="slds-grid slds-grid_align-end">
+                            <!-- Row 4: Full-Width Touch-Friendly CTA Button -->
+                            <div class="full-width-cta">
                                 <lightning-button
                                     label="Add to Order"
                                     icon-name="utility:add"

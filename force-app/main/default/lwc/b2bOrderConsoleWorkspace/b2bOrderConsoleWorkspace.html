@@ -1,72 +1,53 @@
 <template>
-    <div class="slds-p-around_x-small">
-        <!-- SLDS Enterprise Portfolio Page Header (Responsive Mobile + Desktop) -->
+    <div class="workspace-root slds-p-around_x-small">
+        <!-- SLDS Enterprise Portfolio Page Header (Mobile-First Responsive) -->
         <div class="slds-page-header slds-m-bottom_small slds-box slds-theme_default">
-            <div class="slds-page-header__row slds-grid slds-wrap">
-                <div class="slds-page-header__col-title slds-size_1-of-1 slds-large-size_7-of-12">
-                    <div class="slds-media slds-media_center">
-                        <div class="slds-media__figure">
-                            <lightning-icon
-                                icon-name="standard:orders"
-                                size="medium"
-                                alternative-text="B2B Order Console"
-                            ></lightning-icon>
-                        </div>
-                        <div class="slds-media__body">
-                            <div class="slds-page-header__name">
-                                <div class="slds-page-header__name-title">
-                                    <h1>
-                                        <span
-                                            class="slds-page-header__title slds-truncate"
-                                            title="B2B Order &amp; Inventory Console"
-                                        >
-                                            B2B Order &amp; Inventory Console
-                                        </span>
-                                    </h1>
-                                </div>
-                            </div>
-                            <p class="slds-page-header__name-meta slds-m-top_xx-small">
-                                Salesforce DX Enterprise Architecture • Selector / Domain / Service • Named Credential REST • Platform Events
-                            </p>
-                        </div>
+            <div class="header-flex">
+                <div class="slds-media slds-media_center">
+                    <div class="slds-media__figure">
+                        <lightning-icon
+                            icon-name="standard:orders"
+                            size="medium"
+                            alternative-text="B2B Order Console"
+                        ></lightning-icon>
+                    </div>
+                    <div class="slds-media__body header-title-body">
+                        <h1 class="slds-page-header__title workspace-title" title="B2B Order &amp; Inventory Console">
+                            B2B Order &amp; Inventory Console
+                        </h1>
+                        <p class="slds-page-header__name-meta slds-m-top_xx-small workspace-subtitle">
+                            Salesforce DX Enterprise Architecture &bull; Selector / Domain / Service &bull; Named Credential REST &bull; Platform Events
+                        </p>
                     </div>
                 </div>
-                <div class="slds-page-header__col-actions slds-size_1-of-1 slds-large-size_5-of-12 slds-m-top_x-small">
-                    <div class="slds-grid slds-wrap slds-gutters_xx-small slds-grid_align-end">
-                        <div class="slds-col slds-m-bottom_xx-small">
-                            <lightning-badge
-                                label="Apex Enterprise Patterns"
-                                icon-name="utility:apex"
-                                class="slds-badge_lightest"
-                            ></lightning-badge>
-                        </div>
-                        <div class="slds-col slds-m-bottom_xx-small">
-                            <lightning-badge
-                                label="Named Credential REST"
-                                icon-name="utility:connected_apps"
-                                class="slds-badge_lightest"
-                            ></lightning-badge>
-                        </div>
-                        <div class="slds-col slds-m-bottom_xx-small">
-                            <lightning-badge
-                                label="Platform Events + LMS"
-                                icon-name="utility:broadcast"
-                                class="slds-badge_lightest"
-                            ></lightning-badge>
-                        </div>
-                    </div>
+                <div class="badge-strip slds-m-top_x-small">
+                    <lightning-badge
+                        label="Apex Enterprise Patterns"
+                        icon-name="utility:apex"
+                        class="slds-badge_lightest"
+                    ></lightning-badge>
+                    <lightning-badge
+                        label="Named Credential REST"
+                        icon-name="utility:connected_apps"
+                        class="slds-badge_lightest"
+                    ></lightning-badge>
+                    <lightning-badge
+                        label="Platform Events + LMS"
+                        icon-name="utility:broadcast"
+                        class="slds-badge_lightest"
+                    ></lightning-badge>
                 </div>
             </div>
         </div>
 
         <!-- MOBILE & TABLET NAVIGATION SWITCHER (< 1024px): Active Tab Shows Text, Inactive Tabs Show Icon Only -->
-        <div class="slds-hide_large slds-m-bottom_small">
+        <div class="mobile-switcher-bar slds-m-bottom_small">
             <div class="slds-box slds-box_x-small slds-theme_shade">
-                <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
-                    <span class="slds-text-title_caps slds-text-color_weak">
+                <div class="mobile-nav-row">
+                    <span class="slds-text-title_caps slds-text-color_weak mobile-nav-caption">
                         Workspace View
                     </span>
-                    <div class="slds-button-group" role="group" aria-label="Mobile Workspace View Switcher">
+                    <div class="mobile-tab-strip" role="group" aria-label="Mobile Workspace View Switcher">
                         <!-- 1. Catalog Tab -->
                         <template lwc:if={isCatalogTabActive}>
                             <lightning-button
@@ -155,7 +136,7 @@
 
                 <!-- Mobile Quick-Jump Banner when item is added to cart while on Catalog tab -->
                 <template lwc:if={showMobileCartPrompt}>
-                    <div class="slds-box slds-box_xx-small slds-theme_info slds-m-top_x-small slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                    <div class="slds-box slds-box_xx-small slds-theme_info slds-m-top_x-small mobile-cart-banner">
                         <span class="slds-text-body_small">
                             <strong>{mobileCartCount} SKU(s)</strong> in Cart
                         </span>
@@ -170,8 +151,8 @@
             </div>
         </div>
 
-        <!-- Main Responsive 2-Column SLDS Workspace Grid (Always Mounted to Preserve LMS State) -->
-        <div class="slds-grid slds-wrap slds-gutters_small">
+        <!-- Main Responsive 2-Column Workspace Grid (Always Mounted to Preserve LMS State) -->
+        <div class="workspace-grid">
             <!-- Left Column: Warehouse Inventory Catalog -->
             <div class={catalogColumnClass}>
                 <c-b2b-inventory-catalog></c-b2b-inventory-catalog>

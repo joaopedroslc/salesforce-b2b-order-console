@@ -1,16 +1,15 @@
 <template>
-    <lightning-card title="B2B Order &amp; ERP Fulfillment Monitor" icon-name="standard:fulfillment_order">
-        <div slot="actions" class="slds-grid slds-grid_vertical-align-center slds-gutters_x-small">
-            <template lwc:if={empConnected}>
-                <div class="slds-col">
+    <lightning-card title="B2B Order Fulfillment" icon-name="standard:fulfillment_order">
+        <div slot="actions" class="tracker-header-actions">
+            <!-- Desktop Header Actions (>= 768px) -->
+            <div class="desktop-only-view desktop-actions-row">
+                <template lwc:if={empConnected}>
                     <lightning-badge
                         label="Platform Event Auto-Sync Active"
                         icon-name="utility:broadcast"
                         class="slds-theme_success"
                     ></lightning-badge>
-                </div>
-            </template>
-            <div class="slds-col">
+                </template>
                 <lightning-button
                     label="Refresh"
                     icon-name="utility:refresh"
@@ -18,12 +17,34 @@
                     disabled={isProcessing}
                 ></lightning-button>
             </div>
+            <!-- Mobile Header Action (< 768px): Compact Refresh Icon Only (Zero Header Overflow) -->
+            <div class="mobile-only-view">
+                <lightning-button-icon
+                    icon-name="utility:refresh"
+                    variant="border-filled"
+                    alternative-text="Refresh Orders"
+                    title="Refresh Orders"
+                    onclick={handleRefreshOrders}
+                    disabled={isProcessing}
+                ></lightning-button-icon>
+            </div>
         </div>
 
-        <div class="slds-card__body slds-card__body_inner">
+        <div class="slds-card__body slds-card__body_inner tracker-body">
+            <!-- Mobile Status Strip (< 768px) -->
+            <template lwc:if={empConnected}>
+                <div class="mobile-only-view slds-m-bottom_small">
+                    <lightning-badge
+                        label="Platform Event Auto-Sync Active"
+                        icon-name="utility:broadcast"
+                        class="slds-theme_success"
+                    ></lightning-badge>
+                </div>
+            </template>
+
             <template lwc:if={hasOrders}>
                 <!-- DESKTOP & TABLET VIEW (>= 768px): High-Density SLDS Table -->
-                <div class="slds-show_medium slds-scrollable_x">
+                <div class="desktop-only-view slds-scrollable_x">
                     <table
                         class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped"
                         aria-label="B2B Order and ERP Fulfillment Monitor"
@@ -131,43 +152,46 @@
                 </div>
 
                 <!-- MOBILE VIEW (< 768px): Touch-Optimized SLDS Order Fulfillment Cards -->
-                <div class="slds-hide_medium">
+                <div class="mobile-only-view">
                     <template for:each={orders} for:item="ord">
                         <article
                             key={ord.Id}
-                            class="slds-box slds-box_x-small slds-theme_default slds-m-bottom_small"
+                            class="slds-box slds-box_x-small slds-theme_default slds-m-bottom_small mobile-order-card"
                         >
-                            <!-- Mobile Order Header -->
-                            <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-start slds-m-bottom_x-small">
-                                <div class="slds-col slds-has-flexi-truncate slds-p-right_x-small">
-                                    <div class="slds-text-title_bold">{ord.Name} &bull; {ord.accountName}</div>
-                                    <div class="slds-text-body_small slds-text-color_weak">
-                                        <lightning-formatted-date-time
-                                            value={ord.CreatedDate}
-                                            year="numeric"
-                                            month="short"
-                                            day="2-digit"
-                                            hour="2-digit"
-                                            minute="2-digit"
-                                        ></lightning-formatted-date-time>
-                                    </div>
-                                </div>
-                                <div class="slds-col slds-no-flex">
-                                    <span class={ord.statusBadgeClass}>{ord.Status__c}</span>
+                            <!-- Row 1: Order Number Badge + Status Badge -->
+                            <div class="order-top-row slds-m-bottom_xx-small">
+                                <span class="slds-badge slds-badge_lightest">{ord.Name}</span>
+                                <span class={ord.statusBadgeClass}>{ord.Status__c}</span>
+                            </div>
+
+                            <!-- Row 2: Full-Width Customer Name & Timestamp (Zero Vertical Wrapping) -->
+                            <div class="slds-m-bottom_x-small">
+                                <h3 class="slds-text-title_bold order-customer-title">
+                                    {ord.accountName}
+                                </h3>
+                                <div class="slds-text-body_small slds-text-color_weak">
+                                    <lightning-formatted-date-time
+                                        value={ord.CreatedDate}
+                                        year="numeric"
+                                        month="short"
+                                        day="2-digit"
+                                        hour="2-digit"
+                                        minute="2-digit"
+                                    ></lightning-formatted-date-time>
                                 </div>
                             </div>
 
-                            <!-- Mobile Order Metrics Strip -->
+                            <!-- Row 3: 2-Column Shaded Metrics Strip (ERP Sync/Ref | Total Amount) -->
                             <div class="slds-box slds-box_xx-small slds-theme_shade slds-m-bottom_x-small">
-                                <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
-                                    <div>
-                                        <div class="slds-text-body_small slds-text-color_weak">ERP Sync / Ref</div>
-                                        <div class="slds-text-title_bold">{ord.erpRefDisplay}</div>
+                                <div class="order-metrics-grid">
+                                    <div class="order-metric-cell">
+                                        <div class="metric-caption slds-text-color_weak">ERP Sync / Ref</div>
+                                        <div class="slds-text-title_bold order-ref-text">{ord.erpRefDisplay}</div>
                                         <div class="slds-text-body_small slds-text-color_weak">{ord.syncStatusDisplay}</div>
                                     </div>
-                                    <div class="slds-text-align_right">
-                                        <div class="slds-text-body_small slds-text-color_weak">
-                                            {ord.Total_Items__c} item(s)
+                                    <div class="order-metric-cell slds-text-align_right slds-border_left">
+                                        <div class="metric-caption slds-text-color_weak">
+                                            Total ({ord.Total_Items__c} items)
                                         </div>
                                         <div class="slds-text-heading_small slds-text-title_bold">
                                             <lightning-formatted-number
@@ -180,49 +204,49 @@
                                 </div>
                             </div>
 
-                            <!-- Line Items Summary -->
+                            <!-- Row 4: Line Items Summary -->
                             <template lwc:if={ord.hasLineItems}>
-                                <div class="slds-text-body_small slds-text-color_weak slds-m-bottom_x-small">
+                                <div class="slds-text-body_small slds-text-color_weak slds-m-bottom_x-small order-lines-box">
                                     <template for:each={ord.lineItems} for:item="li">
-                                        <div key={li.Id}>{li.Quantity__c}x {li.productName}</div>
+                                        <div key={li.Id} class="order-line-entry">
+                                            <strong>{li.Quantity__c}x</strong> {li.productName}
+                                        </div>
                                     </template>
                                 </div>
                             </template>
 
-                            <!-- Mobile Lifecycle Actions -->
-                            <div class="slds-grid slds-grid_align-end">
-                                <lightning-button-group>
-                                    <template lwc:if={ord.canSubmit}>
-                                        <lightning-button
-                                            label="Submit to ERP"
-                                            variant="brand"
-                                            data-id={ord.Id}
-                                            data-status="Submitted"
-                                            onclick={handleStatusAction}
-                                            disabled={isProcessing}
-                                        ></lightning-button>
-                                    </template>
-                                    <template lwc:if={ord.canShip}>
-                                        <lightning-button
-                                            label="Mark Shipped"
-                                            variant="success"
-                                            data-id={ord.Id}
-                                            data-status="Shipped"
-                                            onclick={handleStatusAction}
-                                            disabled={isProcessing}
-                                        ></lightning-button>
-                                    </template>
-                                    <template lwc:if={ord.canCancel}>
-                                        <lightning-button
-                                            label="Cancel"
-                                            variant="destructive-text"
-                                            data-id={ord.Id}
-                                            data-status="Cancelled"
-                                            onclick={handleStatusAction}
-                                            disabled={isProcessing}
-                                        ></lightning-button>
-                                    </template>
-                                </lightning-button-group>
+                            <!-- Row 5: Responsive Wrapping Lifecycle Actions -->
+                            <div class="order-actions-row">
+                                <template lwc:if={ord.canSubmit}>
+                                    <lightning-button
+                                        label="Submit to ERP"
+                                        variant="brand"
+                                        data-id={ord.Id}
+                                        data-status="Submitted"
+                                        onclick={handleStatusAction}
+                                        disabled={isProcessing}
+                                    ></lightning-button>
+                                </template>
+                                <template lwc:if={ord.canShip}>
+                                    <lightning-button
+                                        label="Mark Shipped"
+                                        variant="success"
+                                        data-id={ord.Id}
+                                        data-status="Shipped"
+                                        onclick={handleStatusAction}
+                                        disabled={isProcessing}
+                                    ></lightning-button>
+                                </template>
+                                <template lwc:if={ord.canCancel}>
+                                    <lightning-button
+                                        label="Cancel"
+                                        variant="destructive-text"
+                                        data-id={ord.Id}
+                                        data-status="Cancelled"
+                                        onclick={handleStatusAction}
+                                        disabled={isProcessing}
+                                    ></lightning-button>
+                                </template>
                             </div>
                         </article>
                     </template>

@@ -9,3 +9,7 @@
 .vscode
 
 coverage/
+screen recordings/
+*.mp4
+*.mov
+*.webm
