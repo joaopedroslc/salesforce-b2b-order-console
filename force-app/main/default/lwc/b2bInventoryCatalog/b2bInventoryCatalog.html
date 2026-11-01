@@ -1,0 +1,155 @@
+<template>
+    <lightning-card title="B2B Warehouse Inventory Catalog" icon-name="standard:product">
+        <div slot="actions" class="slds-grid slds-gutters_x-small">
+            <div class="slds-col">
+                <lightning-button
+                    label="Seed Demo Data"
+                    icon-name="utility:database"
+                    onclick={handleSeedCatalog}
+                    disabled={isSyncing}
+                ></lightning-button>
+            </div>
+            <div class="slds-col">
+                <lightning-button
+                    variant="brand"
+                    label="Sync with ERP"
+                    icon-name="utility:sync"
+                    onclick={handleSyncErp}
+                    disabled={isSyncing}
+                ></lightning-button>
+            </div>
+        </div>
+
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <!-- KPI Summary Strip -->
+            <div class="slds-grid slds-wrap slds-gutters_small slds-m-bottom_medium">
+                <div class="slds-col slds-size_1-of-3">
+                    <div class="kpi-box">
+                        <span class="kpi-label">Active SKUs</span>
+                        <span class="kpi-value">{totalSkus}</span>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-3">
+                    <div class="kpi-box">
+                        <span class="kpi-label">Available Units</span>
+                        <span class="kpi-value">{totalAvailableUnits}</span>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-3">
+                    <div class="kpi-box">
+                        <span class="kpi-label">Low / Out Alerts</span>
+                        <span class="kpi-value kpi-alert">{lowOrOutCount}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search & Filter Controls -->
+            <div class="slds-grid slds-wrap slds-gutters_small slds-m-bottom_medium">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_7-of-12">
+                    <lightning-input
+                        type="search"
+                        label="Search Catalog"
+                        variant="label-hidden"
+                        placeholder="Search by Product Name, Code, or External SKU..."
+                        onchange={handleSearchChange}
+                    ></lightning-input>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12">
+                    <lightning-combobox
+                        name="stockStatus"
+                        label="Filter Stock Status"
+                        variant="label-hidden"
+                        value={selectedStatus}
+                        options={statusOptions}
+                        onchange={handleStatusChange}
+                    ></lightning-combobox>
+                </div>
+            </div>
+
+            <!-- Loading Skeleton -->
+            <template lwc:if={isLoading}>
+                <div class="skeleton-container" role="status" aria-label="Loading inventory catalog">
+                    <div class="skeleton-row"></div>
+                    <div class="skeleton-row"></div>
+                    <div class="skeleton-row"></div>
+                </div>
+            </template>
+
+            <!-- Catalog Table -->
+            <template lwc:elseif={hasInventoryItems}>
+                <div class="catalog-scroll">
+                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                        <thead>
+                            <tr class="slds-line-height_reset">
+                                <th scope="col"><div class="slds-truncate" title="Product &amp; SKU">Product / SKU</div></th>
+                                <th scope="col"><div class="slds-truncate" title="Unit Price">Unit Price</div></th>
+                                <th scope="col"><div class="slds-truncate" title="On Hand">On Hand</div></th>
+                                <th scope="col"><div class="slds-truncate" title="Reserved">Reserved</div></th>
+                                <th scope="col"><div class="slds-truncate" title="Available">Available</div></th>
+                                <th scope="col"><div class="slds-truncate" title="Status">Status</div></th>
+                                <th scope="col"><div class="slds-truncate" title="Action">Action</div></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={inventoryItems} for:item="item">
+                                <tr key={item.Id} class="slds-hint-parent">
+                                    <td>
+                                        <div class="slds-text-title_bold slds-truncate" title={item.productName}>
+                                            {item.productName}
+                                        </div>
+                                        <div class="slds-text-body_small slds-text-color_weak">
+                                            {item.External_SKU__c} &bull; {item.productFamily}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <lightning-formatted-number
+                                            value={item.Unit_Price__c}
+                                            format-style="currency"
+                                            currency-code="USD"
+                                        ></lightning-formatted-number>
+                                    </td>
+                                    <td>{item.On_Hand_Quantity__c}</td>
+                                    <td>{item.Reserved_Quantity__c}</td>
+                                    <td>
+                                        <strong class="avail-qty">{item.Available_Quantity__c}</strong>
+                                    </td>
+                                    <td>
+                                        <span class={item.badgeClass}>{item.Stock_Status__c}</span>
+                                    </td>
+                                    <td>
+                                        <lightning-button
+                                            label="Add to Order"
+                                            icon-name="utility:add"
+                                            variant="neutral"
+                                            data-id={item.Id}
+                                            onclick={handleAddToOrder}
+                                            disabled={item.isOutOfStock}
+                                        ></lightning-button>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+
+            <!-- Empty State -->
+            <template lwc:else>
+                <div class="empty-state slds-p-around_large slds-text-align_center">
+                    <lightning-icon icon-name="utility:package_org" size="medium" class="slds-m-bottom_small"></lightning-icon>
+                    <h3 class="slds-text-heading_small slds-m-bottom_x-small">No Catalog Inventory Found</h3>
+                    <p class="slds-text-color_weak slds-m-bottom_medium">
+                        Click &ldquo;Seed Demo Data&rdquo; to populate sample B2B Accounts, Products, and Warehouse Stock.
+                    </p>
+                    <lightning-button
+                        variant="brand"
+                        label="Seed Sample B2B Catalog"
+                        icon-name="utility:database"
+                        onclick={handleSeedCatalog}
+                        disabled={isSyncing}
+                    ></lightning-button>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>
