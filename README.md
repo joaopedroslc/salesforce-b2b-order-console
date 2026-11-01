@@ -1,58 +1,190 @@
-# Salesforce DX Project
+# Salesforce B2B Order & Inventory Console
 
-Salesforce DX is a development approach that brings source-driven development, team collaboration, and continuous integration to the Salesforce Platform. Instead of working directly in an org through a web browser, you work with metadata as source files in a local DX project, track changes in version control, and deploy through automated processes.
+A production-grade Salesforce DX (SFDX) portfolio application demonstrating **Apex Enterprise Patterns (Separation of Concerns)**, **strict CRUD/FLS security (`WITH USER_MODE` & `Security.stripInaccessible`)**, **Named Credential REST Callout Integration**, **Event-Driven Asynchronous Processing (`Queueable` + `Platform Events`)**, and **modern Lightning Web Components (SLDS, LMS, Custom Events, and `lightning/empApi`)**.
 
-This project template gets you started with the tools and structure you need to build Salesforce applications using source control, scratch orgs, and the Salesforce CLI.
+---
 
-## Prerequisites
+## Table of Contents
+1. [Executive Overview](#1-executive-overview)
+2. [System Architecture & Event Flow](#2-system-architecture--event-flow)
+3. [Data Model (ERD)](#3-data-model-erd)
+4. [Enterprise Apex Architecture (Separation of Concerns)](#4-enterprise-apex-architecture-separation-of-concerns)
+5. [LWC Frontend & SLDS Design System](#5-lwc-frontend--slds-design-system)
+6. [Deployment & Quickstart Guide](#6-deployment--quickstart-guide)
+7. [End-to-End QA & Live Demo Test Guide](#7-end-to-end-qa--live-demo-test-guide)
 
-Before you start, make sure you have:
+---
 
-- **Salesforce CLI** - Download from [developer.salesforce.com/tools/salesforcecli](https://developer.salesforce.com/tools/salesforcecli). See [Install Salesforce CLI](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_install_cli.htm) for details.
-- **VS Code with Salesforce Extension Pack** - See [Installation Instructions](https://developer.salesforce.com/docs/platform/sfvscode-extensions/guide/install.html) for details. Includes the Agentforce Vibes extension.
-- **A development org** - Sign up for a free Developer Edition org [here](https://developer.salesforce.com/signup).
-- **Dev Hub enabled** (optional, required to create scratch orgs) - You can enable Dev Hub in your development org under Setup > Dev Hub.  See [Provide Developers Access to Salesforce DX Tools](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_setup_dx_tools.htm).
+## 1. Executive Overview
 
-## Project Structure
+The **B2B Order & Inventory Console** is a unified workspace designed for B2B account managers and fulfillment operations teams to:
+* Browse real-time warehouse stock (`On Hand`, `Reserved`, and `Available` quantities) across catalog products (`Product2` + `Product_Inventory__c`).
+* Synchronize live inventory levels on-demand with an external ERP endpoint via a Salesforce **Named Credential** (`callout:ERP_Inventory_API`).
+* Build, validate, and submit multi-line B2B customer orders (`B2B_Order__c` + `B2B_Order_Item__c`) with instant stock reservation and rollback safety.
+* Process ERP order confirmations asynchronously via **`Queueable` Apex (`Database.AllowsCallouts`)** and broadcast live updates back to the UI using **Platform Events (`Order_Status_Event__e`)** and **`lightning/empApi`**.
 
-Your DX project follows this structure:
+---
 
-- **`force-app/main/default/`** - Your metadata source files live in this default package directory. You can configure additional package directories in the `sfdx-project.json` file.
-- **`config/`** - Scratch org definitions and project settings
-- **`scripts/`** - Automation scripts for common tasks
-- **`sfdx-project.json`** - Project manifest that defines package directories, namespace, API version, and other project-level settings
+## 2. System Architecture & Event Flow
 
-See [Salesforce DX Project Configuration](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_ws_config.htm).
+```mermaid
+flowchart TD
+    subgraph LWC_Workspace["Lightning App Page: B2B Order & Inventory Console"]
+        Catalog["b2bInventoryCatalog (LWC)<br/>Search, Stock Filter, ERP Sync"]
+        Builder["b2bOrderBuilder (LWC)<br/>Account Cart & Order Submission"]
+        LineItem["b2bOrderLineItem (Child LWC)<br/>@api + CustomEvents"]
+        Tracker["b2bOrderTracker (LWC)<br/>Order Lifecycle & empApi Listener"]
+        LMS(("Lightning Message Service<br/>B2B_Order_Channel__c"))
 
-## Get Started
+        Catalog -->|"Publishes ADD_TO_ORDER"| LMS
+        LMS -->|"Subscribes ADD_TO_ORDER"| Builder
+        Builder <-->|"@api item / CustomEvents"| LineItem
+        Builder -->|"Publishes ORDER_UPDATED"| LMS
+        LMS -->|"Refreshes Stock & Orders"| Catalog
+        LMS -->|"Refreshes Orders"| Tracker
+    end
 
-Ready to start developing? The [Get Started with Salesforce DX](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_get_started_dx.htm) guide walks you through your first project, from creating a scratch org to creating a simple Apex class or LWC to deploying your code to a sandbox.
+    subgraph Apex_Layers["Enterprise Apex Backend (Separation of Concerns)"]
+        Controller["B2BOrderConsoleController<br/>(@AuraEnabled Entrypoint)"]
+        Service["B2BOrderService<br/>(Transaction Savepoints & StripInaccessible)"]
+        Selector["B2BOrdersSelector & ProductInventoriesSelector<br/>(SOQL WITH USER_MODE)"]
+        Trigger["B2BOrderTrigger & B2BOrderItemTrigger<br/>(TriggerHandler Framework)"]
+        Domain["B2BOrdersDomain & B2BOrderItemsDomain<br/>(Validation, State Machine, Stock Reservation)"]
+        Queueable["ERPOrderSyncQueueable<br/>(Queueable, Database.AllowsCallouts)"]
+        Callout["ERPInventoryCalloutService<br/>(Named Credential: ERP_Inventory_API)"]
+        PE(("Platform Event<br/>Order_Status_Event__e"))
+        PETrigger["OrderStatusEventTrigger<br/>(Apex Event Subscriber)"]
+    end
 
-## Common Salesforce CLI Commands
+    ExternalERP[("External ERP REST API<br/>(callout:ERP_Inventory_API)")]
 
-Here are common CLI commands that you'll use the most:
+    Catalog & Builder & Tracker -->|"Imperative / @wire"| Controller
+    Controller --> Service & Selector
+    Service -->|"DML (AccessLevel.USER_MODE)"| Trigger
+    Trigger --> Domain
+    Domain -->|"Bulk Stock Reservation"| Selector
+    Domain -->|"Enqueues on Submitted"| Queueable
+    Queueable --> Callout
+    Callout -->|"HTTPS POST"| ExternalERP
+    Queueable -->|"EventBus.publish()"| PE
+    PE -->|"After Insert"| PETrigger
+    PETrigger -->|"Updates Status to Confirmed"| Service
+    PE -->|"Streaming API (empApi)"| Tracker
+```
 
-- `sf org login web`: Authorize an org
-- `sf org open`: Open your org in a browser
-- `sf org create scratch`: Create a scratch org
-- `sf project deploy start`: Deploy metadata to your org
-- `sf project retrieve start`: Retrieve metadata from your org
-- `sf template generate <artifact>`: Scaffold new components, such as Apex classes and triggers, LWC components, Lightning apps, and more
-- `sf apex <command>`: Run Apex tests, run anonymous Apex blocks, and view logs
-- `sf data <command>`: Work with test data
-- `sf alias <command>`: Manage org aliases
-- `sf config <command>`: Configure CLI settings
+---
 
-## Use Agentforce Vibes to Build Lightning Apps
+## 3. Data Model (ERD)
 
-Transform your ideas into custom Lightning apps that extend CRM workflows directly in Lightning Experience. Through natural conversations with Agentforce Vibes, implement custom objects and fields, complex business logic, and dynamic UI components. See [Build a Lightning App Using Agentforce Vibes](https://developer.salesforce.com/docs/platform/einstein-for-devs/guide/lexapp-overview.html).
+```mermaid
+erDiagram
+    Account ||--o{ B2B_Order__c : "Master-Detail (Account__c)"
+    B2B_Order__c ||--o{ B2B_Order_Item__c : "Master-Detail (B2B_Order__c)"
+    Product2 ||--o{ Product_Inventory__c : "Lookup (Product__c)"
+    Product2 ||--o{ B2B_Order_Item__c : "Lookup (Product__c)"
+    Product_Inventory__c ||--o{ B2B_Order_Item__c : "Lookup (Product_Inventory__c)"
 
-## Additional Resources
+    Product_Inventory__c {
+        Id Id PK
+        String Name "AutoNumber (INV-{00000})"
+        Id Product__c FK "Lookup(Product2)"
+        String External_SKU__c "Text(50) - External ID, Unique"
+        Decimal Unit_Price__c "Currency(16, 2)"
+        Decimal On_Hand_Quantity__c "Number(16, 0)"
+        Decimal Reserved_Quantity__c "Number(16, 0)"
+        Decimal Available_Quantity__c "Formula (On_Hand - Reserved)"
+        Decimal Reorder_Threshold__c "Number(16, 0)"
+        String Stock_Status__c "Formula (In Stock / Low Stock / Out of Stock)"
+        DateTime Last_ERP_Sync__c "DateTime"
+    }
 
-- [Agentforce Vibes Developer Guide](https://developer.salesforce.com/docs/platform/einstein-for-devs/guide/einstein-overview.html)
-- [Salesforce CLI Installation Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_intro.htm)
-- [Salesforce DX Developer Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/)
-- [Salesforce CLI Command Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/)
-- [Salesforce CLI Plugin Development Guide](https://developer.salesforce.com/docs/platform/salesforce-cli-plugin/guide/conceptual-overview.html)
-- [Salesforce VS Code Extensions Documentation](https://developer.salesforce.com/tools/vscode/)
+    B2B_Order__c {
+        Id Id PK
+        String Name "AutoNumber (ORD-{00000})"
+        Id Account__c FK "Master-Detail(Account)"
+        String Status__c "Picklist (Draft, Submitted, Confirmed, Backordered, Shipped, Cancelled)"
+        Decimal Total_Amount__c "Roll-Up Summary (SUM of Line_Total__c)"
+        Decimal Total_Items__c "Roll-Up Summary (COUNT of Items)"
+        String ERP_Reference_Id__c "Text(80) - External ID"
+        String ERP_Sync_Status__c "Picklist (Not Started, Pending, Synced, Failed)"
+        String ERP_Sync_Message__c "Text(255)"
+        DateTime Submitted_Date__c "DateTime"
+        String Notes__c "LongTextArea(2000)"
+    }
 
+    B2B_Order_Item__c {
+        Id Id PK
+        String Name "AutoNumber (ITEM-{00000})"
+        Id B2B_Order__c FK "Master-Detail(B2B_Order__c)"
+        Id Product__c FK "Lookup(Product2)"
+        Id Product_Inventory__c FK "Lookup(Product_Inventory__c)"
+        Decimal Quantity__c "Number(16, 0)"
+        Decimal Unit_Price__c "Currency(16, 2)"
+        Decimal Line_Total__c "Formula (Quantity * Unit_Price)"
+    }
+```
+
+---
+
+## 4. Enterprise Apex Architecture (Separation of Concerns)
+
+| Architectural Layer | Classes | Responsibility |
+| :--- | :--- | :--- |
+| **Trigger Framework** | `TriggerHandler`, `B2BOrderTriggerHandler`, `B2BOrderItemTriggerHandler`, `ProductInventoryTriggerHandler`, `OrderStatusEventTriggerHandler` | Context dispatch (`beforeInsert`, `afterUpdate`, etc.), static bypass API (`TriggerHandler.bypass()`), recursion guards, and zero business logic in triggers. |
+| **Selector Layer** | `ProductInventoriesSelector`, `B2BOrdersSelector` | Encapsulates all SOQL queries with strict **`WITH USER_MODE`** enforcement, bulkified `Set<Id>` parameters, and dynamic catalog search/filtering. |
+| **Domain Layer** | `B2BOrdersDomain`, `B2BOrderItemsDomain`, `ProductInventoriesDomain` | Enforces SObject state machines (`Draft` → `Submitted` → `Confirmed` → `Shipped` / `Cancelled`), Draft-only item lock rules, SKU normalization, and bulkified inventory reservation/deduction/release across 200+ records. |
+| **Service Layer** | `B2BOrderService`, `ERPInventoryCalloutService`, `ERPOrderSyncQueueable` | Orchestrates atomic multi-object transactions (`Database.setSavepoint()` / `Database.rollback()`), `Security.stripInaccessible`, Named Credential REST callouts, governor-safe Queueable chunking (`MAX_CALLOUTS_PER_TRANSACTION = 90`), and Platform Event publishing. |
+| **Controller Layer** | `B2BOrderConsoleController` | Thin `@AuraEnabled` boundary delegating to Service and Selector layers with clean `AuraHandledException` mapping. |
+| **Test Suite (`91%` Coverage)** | `B2BOrderConsoleTest`, `B2BTestDataFactory`, `ERPInventoryHttpCalloutMock` | Verifies positive flows, negative validation guardrails, HTTP `200`/`409`/`500` callout mocks, and 210-order bulkification without hitting governor limits. |
+
+---
+
+## 5. LWC Frontend & SLDS Design System
+
+The frontend is built strictly on the **Salesforce Lightning Design System (SLDS)**:
+* **100% Native SLDS Utility & Component Styling:** Uses `slds-box`, `slds-theme_shade`, `slds-badge` (`slds-theme_success`, `slds-theme_warning`, `slds-theme_error`, `slds-badge_lightest`), `slds-table_striped`, `slds-table_col-bordered`, `lightning-button-group`, `slds-scrollable_y`, and SLDS Styling Hooks (`var(--lwc-colorBackgroundRowHover)`).
+* **Cross-DOM Sibling Decoupling via LMS (`B2B_Order_Channel__c`):** `b2bInventoryCatalog`, `b2bOrderBuilder`, and `b2bOrderTracker` communicate across independent FlexiPage regions without tight coupling.
+* **Parent-Child Composition (`@api` + `CustomEvent`):** `b2bOrderBuilder` passes line state down to `b2bOrderLineItem` via `@api item` and listens for `quantitychange` and `removeitem` custom events.
+* **Real-Time Streaming (`lightning/empApi`):** `b2bOrderTracker` subscribes to `/event/Order_Status_Event__e` to display instant ERP confirmation toasts and refresh stock/order tables automatically.
+
+---
+
+## 6. Deployment & Quickstart Guide
+
+### Prerequisites
+* Salesforce CLI (`sf`) v2.x+
+* An authenticated Salesforce Developer Edition or Scratch Org
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/joaopedroslc/salesforce-b2b-order-console.git
+cd salesforce-b2b-order-console
+npm install
+```
+
+### 2. Authorize Your Salesforce Org
+```bash
+sf org login web --set-default --alias joaoslc_portfolio
+```
+
+### 3. Deploy Metadata & Assign Permission Set
+```bash
+sf project deploy start --source-dir force-app/main/default
+sf org assign permset --name B2B_Order_Console_Admin
+```
+
+### 4. Run the Apex Test Suite with Code Coverage
+```bash
+sf apex run test --class-names B2BOrderConsoleTest --code-coverage --result-format human --synchronous
+```
+
+### 5. Launch the Application
+1. Run `sf org open` to open your Salesforce org.
+2. Click the **App Launcher** (9 dots in the top-left corner) and search for **B2B Order Console**.
+3. Click **Seed Demo Data** in the top-right of the **B2B Warehouse Inventory Catalog** card to populate sample B2B Accounts, Products, and Inventory records.
+
+---
+
+## 7. End-to-End QA & Live Demo Test Guide
+
+See the complete step-by-step interactive walkthrough in **[docs/END_TO_END_QA_GUIDE.md](docs/END_TO_END_QA_GUIDE.md)** for testing every positive, negative, live ERP callout, Platform Event streaming, and bulk scenario.
