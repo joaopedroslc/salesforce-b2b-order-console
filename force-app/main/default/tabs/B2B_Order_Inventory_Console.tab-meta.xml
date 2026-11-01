@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Lightning App Page tab for the B2B Order &amp; Inventory Console.</description>
+    <flexiPage>B2B_Order_Inventory_Console</flexiPage>
+    <label>B2B Order Console</label>
+    <motif>Custom57: Building Block</motif>
+</CustomTab>

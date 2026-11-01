@@ -136,5 +136,9 @@
         <object>Order_Status_Event__e</object>
         <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
+    <tabSettings>
+        <tab>B2B_Order_Inventory_Console</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
 </PermissionSet>
 
