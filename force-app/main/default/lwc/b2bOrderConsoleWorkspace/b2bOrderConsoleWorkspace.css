@@ -48,17 +48,28 @@
 }
 
 .mobile-tab-btn {
-    flex: 1 1 0%;
-    width: 100%;
-    min-width: 0;
+    flex: 0 0 2.5rem;
+    width: 2.5rem;
+    min-width: 2.5rem;
+    height: 2.25rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0 0.5rem;
+    padding: 0;
 }
 
 .mobile-tab-btn_active {
-    flex: 1.5 1 0%;
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+    padding: 0 0.75rem;
+}
+
+.mobile-tab-btn_active span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 600;
 }
 
 .mobile-cart-banner {

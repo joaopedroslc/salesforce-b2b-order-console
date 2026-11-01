@@ -105,3 +105,4 @@ When developing or refactoring with AI assistants, follow these validated indust
 | **Check Git Status** | `git status --short` |
 | **Stage & Commit** | `git add <files>; git commit -m "<conventional commit message>"` |
 | **Push to Origin** | `git push origin main` |
+
