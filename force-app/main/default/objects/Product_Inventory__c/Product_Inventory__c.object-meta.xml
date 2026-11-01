@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <deploymentStatus>Deployed</deploymentStatus>
+    <description>Tracks warehouse stock levels, reservations, and ERP synchronization state for B2B catalog products.</description>
+    <enableActivities>true</enableActivities>
+    <enableBulkApi>true</enableBulkApi>
+    <enableHistory>true</enableHistory>
+    <enableReports>true</enableReports>
+    <enableSearch>true</enableSearch>
+    <enableSharing>true</enableSharing>
+    <enableStreamingApi>true</enableStreamingApi>
+    <label>Product Inventory</label>
+    <nameField>
+        <displayFormat>INV-{00000}</displayFormat>
+        <label>Inventory Number</label>
+        <type>AutoNumber</type>
+    </nameField>
+    <pluralLabel>Product Inventories</pluralLabel>
+    <sharingModel>ReadWrite</sharingModel>
+</CustomObject>
+

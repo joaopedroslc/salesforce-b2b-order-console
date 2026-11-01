@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <deploymentStatus>Deployed</deploymentStatus>
+    <description>Represents an individual product line item on a B2B Order.</description>
+    <enableActivities>false</enableActivities>
+    <enableBulkApi>true</enableBulkApi>
+    <enableHistory>true</enableHistory>
+    <enableReports>true</enableReports>
+    <enableSearch>true</enableSearch>
+    <enableSharing>true</enableSharing>
+    <enableStreamingApi>true</enableStreamingApi>
+    <label>B2B Order Item</label>
+    <nameField>
+        <displayFormat>ITEM-{00000}</displayFormat>
+        <label>Order Item Number</label>
+        <type>AutoNumber</type>
+    </nameField>
+    <pluralLabel>B2B Order Items</pluralLabel>
+    <sharingModel>ControlledByParent</sharingModel>
+</CustomObject>
+

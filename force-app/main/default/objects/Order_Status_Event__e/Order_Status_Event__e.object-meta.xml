@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <deploymentStatus>Deployed</deploymentStatus>
+    <description>Platform Event published when asynchronous ERP order synchronization finishes, notifying both Apex subscribers and LWC empApi listeners.</description>
+    <eventType>HighVolume</eventType>
+    <label>Order Status Event</label>
+    <pluralLabel>Order Status Events</pluralLabel>
+    <publishBehavior>PublishAfterCommit</publishBehavior>
+</CustomObject>
+
