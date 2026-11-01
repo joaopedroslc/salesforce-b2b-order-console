@@ -39,21 +39,54 @@
                 ></lightning-button>
             </div>
 
-            <!-- Native SLDS KPI Summary Strip (Zero Truncation on Mobile & Desktop) -->
+            <!-- Native SLDS KPI Summary Strip (SLDS Media Objects on Desktop, Compact Tiles on Mobile) -->
             <div class="kpi-grid slds-m-bottom_small">
-                <div class="slds-box slds-box_x-small slds-theme_shade slds-text-align_center kpi-card">
-                    <p class="kpi-label slds-text-color_weak">SKUs</p>
-                    <p class="slds-text-heading_small slds-text-title_bold">{totalSkus}</p>
+                <div class="slds-box slds-box_x-small slds-theme_shade slds-card_boundary kpi-card">
+                    <div class="slds-media slds-media_center">
+                        <div class="slds-media__figure desktop-only-view">
+                            <lightning-icon
+                                icon-name="standard:product_item"
+                                size="small"
+                                alternative-text="Active SKUs"
+                            ></lightning-icon>
+                        </div>
+                        <div class="slds-media__body kpi-media-body">
+                            <p class="kpi-label slds-text-color_weak">SKUs</p>
+                            <p class="slds-text-heading_small slds-text-title_bold">{totalSkus}</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="slds-box slds-box_x-small slds-theme_shade slds-text-align_center kpi-card">
-                    <p class="kpi-label slds-text-color_weak">Available</p>
-                    <p class="slds-text-heading_small slds-text-title_bold">{totalAvailableUnits}</p>
+                <div class="slds-box slds-box_x-small slds-theme_shade slds-card_boundary kpi-card">
+                    <div class="slds-media slds-media_center">
+                        <div class="slds-media__figure desktop-only-view">
+                            <lightning-icon
+                                icon-name="standard:fulfillment_order"
+                                size="small"
+                                alternative-text="Available Units"
+                            ></lightning-icon>
+                        </div>
+                        <div class="slds-media__body kpi-media-body">
+                            <p class="kpi-label slds-text-color_weak">Available</p>
+                            <p class="slds-text-heading_small slds-text-title_bold">{totalAvailableUnits}</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="slds-box slds-box_x-small slds-theme_shade slds-text-align_center kpi-card">
-                    <p class="kpi-label slds-text-color_weak">Alerts</p>
-                    <p class="slds-text-heading_small slds-text-title_bold slds-text-color_error">
-                        {lowOrOutCount}
-                    </p>
+                <div class="slds-box slds-box_x-small slds-theme_shade slds-card_boundary kpi-card">
+                    <div class="slds-media slds-media_center">
+                        <div class="slds-media__figure desktop-only-view">
+                            <lightning-icon
+                                icon-name="standard:incident"
+                                size="small"
+                                alternative-text="Low or Out of Stock Alerts"
+                            ></lightning-icon>
+                        </div>
+                        <div class="slds-media__body kpi-media-body">
+                            <p class="kpi-label slds-text-color_weak">Alerts</p>
+                            <p class="slds-text-heading_small slds-text-title_bold slds-text-color_error">
+                                {lowOrOutCount}
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -154,7 +187,7 @@
                     <template for:each={inventoryItems} for:item="item">
                         <article
                             key={item.Id}
-                            class="slds-box slds-box_x-small slds-theme_default slds-m-bottom_small mobile-product-card"
+                            class="slds-box slds-box_x-small slds-theme_default slds-card_boundary slds-m-bottom_small mobile-product-card"
                         >
                             <!-- Row 1: SKU Badge + Stock Status Badge -->
                             <div class="card-top-row slds-m-bottom_xx-small">
@@ -217,10 +250,12 @@
 
             <!-- SLDS Empty State Box -->
             <template lwc:else>
-                <div class="slds-box slds-theme_shade slds-p-around_large slds-text-align_center">
-                    <lightning-icon icon-name="utility:package_org" size="medium" class="slds-m-bottom_small"></lightning-icon>
-                    <h3 class="slds-text-heading_small slds-m-bottom_x-small">No Catalog Inventory Found</h3>
-                    <p class="slds-text-color_weak slds-m-bottom_medium">
+                <div class="slds-box slds-theme_shade slds-card_boundary slds-p-around_large slds-text-align_center">
+                    <div class="slds-m-bottom_small">
+                        <lightning-icon icon-name="standard:product" size="large" alternative-text="No Catalog Inventory"></lightning-icon>
+                    </div>
+                    <h3 class="slds-text-heading_small slds-m-bottom_xx-small">No Catalog Inventory Found</h3>
+                    <p class="slds-text-body_regular slds-text-color_weak slds-m-bottom_medium">
                         Click &ldquo;Seed Demo Data&rdquo; to populate sample B2B Accounts, Products, and Warehouse Stock.
                     </p>
                     <lightning-button

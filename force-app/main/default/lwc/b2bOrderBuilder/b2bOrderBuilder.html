@@ -100,10 +100,12 @@
 
             <!-- SLDS Empty Cart Box -->
             <template lwc:else>
-                <div class="slds-box slds-theme_shade slds-p-around_large slds-text-align_center">
-                    <lightning-icon icon-name="utility:cart" size="medium" class="slds-m-bottom_small"></lightning-icon>
-                    <h3 class="slds-text-heading_small slds-m-bottom_x-small">Your B2B Order Cart is Empty</h3>
-                    <p class="slds-text-color_weak">
+                <div class="slds-box slds-theme_shade slds-card_boundary slds-p-around_large slds-text-align_center">
+                    <div class="slds-m-bottom_small">
+                        <lightning-icon icon-name="standard:webcart" size="large" alternative-text="Empty Cart"></lightning-icon>
+                    </div>
+                    <h3 class="slds-text-heading_small slds-m-bottom_xx-small">Your B2B Order Cart is Empty</h3>
+                    <p class="slds-text-body_regular slds-text-color_weak">
                         Select &ldquo;Add to Order&rdquo; on any product in the Warehouse Inventory Catalog to begin building an order.
                     </p>
                 </div>

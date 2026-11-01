@@ -103,7 +103,22 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <span class={ord.statusBadgeClass}>{ord.Status__c}</span>
+                                        <div class="slds-m-bottom_xx-small">
+                                            <span class={ord.statusBadgeClass}>{ord.Status__c}</span>
+                                        </div>
+                                        <template lwc:if={ord.showProgressBar}>
+                                            <lightning-progress-indicator
+                                                current-step={ord.progressStep}
+                                                type="base"
+                                                has-error={ord.hasErrorStep}
+                                                variant="base"
+                                            >
+                                                <lightning-progress-step label="Draft" value="Draft"></lightning-progress-step>
+                                                <lightning-progress-step label="Submitted" value="Submitted"></lightning-progress-step>
+                                                <lightning-progress-step label="Confirmed" value="Confirmed"></lightning-progress-step>
+                                                <lightning-progress-step label="Shipped" value="Shipped"></lightning-progress-step>
+                                            </lightning-progress-indicator>
+                                        </template>
                                     </td>
                                     <td>
                                         <div class="slds-text-title_bold">{ord.erpRefDisplay}</div>
@@ -156,7 +171,7 @@
                     <template for:each={orders} for:item="ord">
                         <article
                             key={ord.Id}
-                            class="slds-box slds-box_x-small slds-theme_default slds-m-bottom_small mobile-order-card"
+                            class="slds-box slds-box_x-small slds-theme_default slds-card_boundary slds-m-bottom_small mobile-order-card"
                         >
                             <!-- Row 1: Order Number Badge + Status Badge -->
                             <div class="order-top-row slds-m-bottom_xx-small">
@@ -180,6 +195,23 @@
                                     ></lightning-formatted-date-time>
                                 </div>
                             </div>
+
+                            <!-- Native SLDS Order Lifecycle Progress Bar -->
+                            <template lwc:if={ord.showProgressBar}>
+                                <div class="slds-m-bottom_x-small slds-p-horizontal_xx-small">
+                                    <lightning-progress-indicator
+                                        current-step={ord.progressStep}
+                                        type="base"
+                                        has-error={ord.hasErrorStep}
+                                        variant="base"
+                                    >
+                                        <lightning-progress-step label="Draft" value="Draft"></lightning-progress-step>
+                                        <lightning-progress-step label="Submitted" value="Submitted"></lightning-progress-step>
+                                        <lightning-progress-step label="Confirmed" value="Confirmed"></lightning-progress-step>
+                                        <lightning-progress-step label="Shipped" value="Shipped"></lightning-progress-step>
+                                    </lightning-progress-indicator>
+                                </div>
+                            </template>
 
                             <!-- Row 3: 2-Column Shaded Metrics Strip (ERP Sync/Ref | Total Amount) -->
                             <div class="slds-box slds-box_xx-small slds-theme_shade slds-m-bottom_x-small">
@@ -254,11 +286,13 @@
             </template>
 
             <template lwc:else>
-                <div class="slds-box slds-theme_shade slds-p-around_large slds-text-align_center">
-                    <lightning-icon icon-name="utility:fulfillment_order" size="medium" class="slds-m-bottom_small"></lightning-icon>
-                    <h3 class="slds-text-heading_small slds-m-bottom_x-small">No B2B Orders Yet</h3>
-                    <p class="slds-text-color_weak">
-                        Orders created or submitted in the Order Builder will appear here with real-time Platform Event status updates.
+                <div class="slds-box slds-theme_shade slds-card_boundary slds-p-around_large slds-text-align_center">
+                    <div class="slds-m-bottom_small">
+                        <lightning-icon icon-name="standard:fulfillment_order" size="large" alternative-text="No Orders"></lightning-icon>
+                    </div>
+                    <h3 class="slds-text-heading_small slds-m-bottom_xx-small">No B2B Orders Yet</h3>
+                    <p class="slds-text-body_regular slds-text-color_weak">
+                        Orders created or submitted in the Order Builder will appear here with live SLDS lifecycle progression.
                     </p>
                 </div>
             </template>

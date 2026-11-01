@@ -51,6 +51,9 @@ export default class B2bOrderTracker extends LightningElement {
                     erpRefDisplay: ord.ERP_Reference_Id__c ? ord.ERP_Reference_Id__c : 'Pending ERP',
                     syncStatusDisplay: syncStatus,
                     statusBadgeClass: this.computeSldsOrderBadgeClass(status),
+                    progressStep: this.computeProgressStep(status),
+                    hasErrorStep: status === 'Backordered' || status === 'Cancelled',
+                    showProgressBar: status !== 'Cancelled',
                     canSubmit: status === 'Draft',
                     canShip: status === 'Confirmed' || status === 'Submitted',
                     canCancel:
@@ -178,6 +181,19 @@ export default class B2bOrderTracker extends LightningElement {
 
     get hasOrders() {
         return this.orders && this.orders.length > 0;
+    }
+
+    computeProgressStep(status) {
+        if (status === 'Submitted') {
+            return 'Submitted';
+        }
+        if (status === 'Confirmed' || status === 'Backordered') {
+            return 'Confirmed';
+        }
+        if (status === 'Shipped') {
+            return 'Shipped';
+        }
+        return 'Draft';
     }
 
     computeSldsOrderBadgeClass(status) {
