@@ -61,3 +61,4 @@ export default class B2bOrderLineItem extends LightningElement {
         );
     }
 }
+

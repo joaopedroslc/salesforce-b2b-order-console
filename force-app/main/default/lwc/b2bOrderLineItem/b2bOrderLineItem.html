@@ -1,6 +1,6 @@
 <template>
     <template lwc:if={item}>
-        <div class="line-item-card slds-p-around_small slds-m-bottom_x-small">
+        <div class="slds-box slds-box_x-small slds-theme_default slds-m-bottom_x-small">
             <div class="slds-grid slds-grid_vertical-align-center slds-wrap">
                 <!-- Product Info -->
                 <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12">
@@ -8,16 +8,17 @@
                         {item.productName}
                     </div>
                     <div class="slds-text-body_small slds-text-color_weak">
-                        {item.externalSku} &bull; Max Avail: {item.availableQuantity}
+                        <span class="slds-badge slds-badge_lightest slds-m-right_xx-small">{item.externalSku}</span>
+                        Max Avail: {item.availableQuantity}
                     </div>
                     <template lwc:if={hasStockError}>
-                        <div class="stock-error-msg">
+                        <div class="slds-text-color_error slds-text-body_small slds-m-top_xx-small">
                             Exceeds available stock ({item.availableQuantity})
                         </div>
                     </template>
                 </div>
 
-                <!-- Quantity Stepper -->
+                <!-- SLDS Quantity Stepper -->
                 <div class="slds-col slds-size_1-of-2 slds-medium-size_3-of-12 slds-grid slds-grid_vertical-align-center">
                     <lightning-button-icon
                         icon-name="utility:dash"
@@ -28,7 +29,7 @@
                     ></lightning-button-icon>
                     <input
                         type="number"
-                        class="qty-input slds-input slds-m-horizontal_xx-small"
+                        class="slds-input slds-text-align_center slds-m-horizontal_xx-small qty-field"
                         value={item.quantity}
                         min="1"
                         max={item.availableQuantity}
@@ -65,7 +66,7 @@
                     </div>
                     <lightning-button-icon
                         icon-name="utility:delete"
-                        variant="bare"
+                        variant="border-filled"
                         alternative-text="Remove line item"
                         title="Remove line item"
                         onclick={handleRemove}

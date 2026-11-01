@@ -38,7 +38,7 @@ export default class B2bOrderTracker extends LightningElement {
                     accountName: ord.Account__r ? ord.Account__r.Name : 'Customer',
                     erpRefDisplay: ord.ERP_Reference_Id__c ? ord.ERP_Reference_Id__c : 'Pending ERP',
                     syncStatusDisplay: ord.ERP_Sync_Status__c || 'Not Started',
-                    statusBadgeClass: this.computeOrderBadgeClass(status),
+                    statusBadgeClass: this.computeSldsOrderBadgeClass(status),
                     canSubmit: status === 'Draft',
                     canShip: status === 'Confirmed' || status === 'Submitted',
                     canCancel:
@@ -165,17 +165,17 @@ export default class B2bOrderTracker extends LightningElement {
         return this.orders && this.orders.length > 0;
     }
 
-    computeOrderBadgeClass(status) {
+    computeSldsOrderBadgeClass(status) {
         if (status === 'Confirmed' || status === 'Shipped') {
-            return 'order-badge badge-confirmed';
+            return 'slds-badge slds-theme_success';
         }
         if (status === 'Submitted' || status === 'Backordered') {
-            return 'order-badge badge-submitted';
+            return 'slds-badge slds-theme_warning';
         }
         if (status === 'Cancelled') {
-            return 'order-badge badge-cancelled';
+            return 'slds-badge slds-theme_error';
         }
-        return 'order-badge badge-draft';
+        return 'slds-badge slds-badge_lightest';
     }
 
     reduceError(error) {

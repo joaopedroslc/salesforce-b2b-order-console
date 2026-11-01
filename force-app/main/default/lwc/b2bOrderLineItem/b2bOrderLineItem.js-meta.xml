@@ -5,3 +5,4 @@
     <masterLabel>B2B Order Line Item</masterLabel>
     <description>Child component rendering an individual B2B order line item with quantity controls and CustomEvent dispatch.</description>
 </LightningComponentBundle>
+

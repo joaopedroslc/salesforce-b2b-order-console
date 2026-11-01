@@ -258,3 +258,4 @@ export default class B2bOrderBuilder extends LightningElement {
         this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
     }
 }
+

@@ -11,7 +11,7 @@
             </template>
         </div>
 
-        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+        <div class="slds-card__body slds-card__body_inner">
             <!-- Customer Account Selector -->
             <div class="slds-m-bottom_small">
                 <lightning-combobox
@@ -27,7 +27,7 @@
 
             <!-- Cart Line Items (Parent -> Child CustomEvents) -->
             <template lwc:if={hasCartItems}>
-                <div class="cart-items-list slds-m-bottom_medium">
+                <div class="slds-scrollable_y cart-max-height slds-m-bottom_medium">
                     <template for:each={cartItems} for:item="line">
                         <c-b2b-order-line-item
                             key={line.inventoryId}
@@ -50,11 +50,13 @@
                     ></lightning-textarea>
                 </div>
 
-                <!-- Order Summary Footer -->
-                <div class="summary-panel slds-p-around_small slds-m-bottom_medium">
-                    <div class="slds-grid slds-grid_align-spread slds-m-bottom_xx-small">
-                        <span class="slds-text-color_weak">Line Items ({totalLineCount} SKUs / {totalUnitsCount} Units)</span>
-                        <span class="slds-text-title_bold">
+                <!-- SLDS Shaded Order Summary Box -->
+                <div class="slds-box slds-box_x-small slds-theme_shade slds-m-bottom_medium">
+                    <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                        <span class="slds-text-title_caps slds-text-color_weak">
+                            Order Summary ({totalLineCount} SKUs / {totalUnitsCount} Units)
+                        </span>
+                        <span class="slds-text-heading_small slds-text-title_bold">
                             <lightning-formatted-number
                                 value={estimatedOrderTotal}
                                 format-style="currency"
@@ -64,17 +66,15 @@
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
-                <div class="slds-grid slds-grid_align-end slds-gutters_x-small">
-                    <div class="slds-col">
+                <!-- SLDS Button Group Actions -->
+                <div class="slds-grid slds-grid_align-end">
+                    <lightning-button-group>
                         <lightning-button
                             label="Save as Draft"
                             icon-name="utility:save"
                             onclick={handleSaveDraft}
                             disabled={isActionDisabled}
                         ></lightning-button>
-                    </div>
-                    <div class="slds-col">
                         <lightning-button
                             variant="brand"
                             label="Submit Order to ERP"
@@ -82,13 +82,13 @@
                             onclick={handleSubmitOrder}
                             disabled={isActionDisabled}
                         ></lightning-button>
-                    </div>
+                    </lightning-button-group>
                 </div>
             </template>
 
-            <!-- Empty Cart Placeholder -->
+            <!-- SLDS Empty Cart Box -->
             <template lwc:else>
-                <div class="empty-cart slds-p-around_large slds-text-align_center">
+                <div class="slds-box slds-theme_shade slds-p-around_large slds-text-align_center">
                     <lightning-icon icon-name="utility:cart" size="medium" class="slds-m-bottom_small"></lightning-icon>
                     <h3 class="slds-text-heading_small slds-m-bottom_x-small">Your B2B Order Cart is Empty</h3>
                     <p class="slds-text-color_weak">

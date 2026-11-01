@@ -3,10 +3,11 @@
         <div slot="actions" class="slds-grid slds-grid_vertical-align-center slds-gutters_x-small">
             <template lwc:if={empConnected}>
                 <div class="slds-col">
-                    <span class="stream-pill">
-                        <span class="stream-dot"></span>
-                        empApi Live Stream Active
-                    </span>
+                    <lightning-badge
+                        label="empApi Live Stream Active"
+                        icon-name="utility:broadcast"
+                        class="slds-theme_success"
+                    ></lightning-badge>
                 </div>
             </template>
             <div class="slds-col">
@@ -19,10 +20,13 @@
             </div>
         </div>
 
-        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+        <div class="slds-card__body slds-card__body_inner">
             <template lwc:if={hasOrders}>
-                <div class="orders-table-wrap">
-                    <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                <div class="slds-scrollable_x">
+                    <table
+                        class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped"
+                        aria-label="B2B Order and ERP Fulfillment Monitor"
+                    >
                         <thead>
                             <tr class="slds-line-height_reset">
                                 <th scope="col"><div class="slds-truncate" title="Order #">Order #</div></th>
@@ -37,7 +41,7 @@
                         <tbody>
                             <template for:each={orders} for:item="ord">
                                 <tr key={ord.Id} class="slds-hint-parent">
-                                    <td>
+                                    <th scope="row">
                                         <div class="slds-text-title_bold">{ord.Name}</div>
                                         <div class="slds-text-body_small slds-text-color_weak">
                                             <lightning-formatted-date-time
@@ -49,13 +53,13 @@
                                                 minute="2-digit"
                                             ></lightning-formatted-date-time>
                                         </div>
-                                    </td>
+                                    </th>
                                     <td>
                                         <div class="slds-truncate" title={ord.accountName}>{ord.accountName}</div>
                                     </td>
                                     <td>
                                         <div class="slds-text-body_small">
-                                            <strong>{ord.Total_Items__c}</strong> item(s)
+                                            <span class="slds-text-title_bold">{ord.Total_Items__c}</span> item(s)
                                         </div>
                                         <template lwc:if={ord.hasLineItems}>
                                             <div class="slds-text-body_small slds-text-color_weak">
@@ -68,13 +72,13 @@
                                         </template>
                                     </td>
                                     <td>
-                                        <strong>
+                                        <span class="slds-text-title_bold">
                                             <lightning-formatted-number
                                                 value={ord.Total_Amount__c}
                                                 format-style="currency"
                                                 currency-code="USD"
                                             ></lightning-formatted-number>
-                                        </strong>
+                                        </span>
                                     </td>
                                     <td>
                                         <span class={ord.statusBadgeClass}>{ord.Status__c}</span>
@@ -86,7 +90,7 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <div class="slds-button-group" role="group">
+                                        <lightning-button-group>
                                             <template lwc:if={ord.canSubmit}>
                                                 <lightning-button
                                                     label="Submit to ERP"
@@ -95,7 +99,6 @@
                                                     data-status="Submitted"
                                                     onclick={handleStatusAction}
                                                     disabled={isProcessing}
-                                                    class="slds-m-right_xx-small"
                                                 ></lightning-button>
                                             </template>
                                             <template lwc:if={ord.canShip}>
@@ -106,7 +109,6 @@
                                                     data-status="Shipped"
                                                     onclick={handleStatusAction}
                                                     disabled={isProcessing}
-                                                    class="slds-m-right_xx-small"
                                                 ></lightning-button>
                                             </template>
                                             <template lwc:if={ord.canCancel}>
@@ -119,7 +121,7 @@
                                                     disabled={isProcessing}
                                                 ></lightning-button>
                                             </template>
-                                        </div>
+                                        </lightning-button-group>
                                     </td>
                                 </tr>
                             </template>
@@ -129,7 +131,7 @@
             </template>
 
             <template lwc:else>
-                <div class="empty-orders slds-p-around_large slds-text-align_center">
+                <div class="slds-box slds-theme_shade slds-p-around_large slds-text-align_center">
                     <lightning-icon icon-name="utility:fulfillment_order" size="medium" class="slds-m-bottom_small"></lightning-icon>
                     <h3 class="slds-text-heading_small slds-m-bottom_x-small">No B2B Orders Yet</h3>
                     <p class="slds-text-color_weak">

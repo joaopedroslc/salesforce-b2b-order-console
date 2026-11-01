@@ -43,7 +43,7 @@ export default class B2bInventoryCatalog extends LightningElement {
                     productCode: inv.Product__r ? inv.Product__r.ProductCode : '',
                     productFamily: inv.Product__r ? inv.Product__r.Family : 'General',
                     isOutOfStock: avail <= 0,
-                    badgeClass: this.computeBadgeClass(status)
+                    sldsBadgeClass: this.computeSldsBadgeClass(status)
                 };
             });
         } else if (result.error) {
@@ -187,14 +187,14 @@ export default class B2bInventoryCatalog extends LightningElement {
         return this.inventoryItems.filter((item) => item.Stock_Status__c !== 'In Stock').length;
     }
 
-    computeBadgeClass(status) {
+    computeSldsBadgeClass(status) {
         if (status === 'In Stock') {
-            return 'status-badge badge-success';
+            return 'slds-badge slds-theme_success';
         }
         if (status === 'Low Stock') {
-            return 'status-badge badge-warning';
+            return 'slds-badge slds-theme_warning';
         }
-        return 'status-badge badge-error';
+        return 'slds-badge slds-theme_error';
     }
 
     reduceError(error) {

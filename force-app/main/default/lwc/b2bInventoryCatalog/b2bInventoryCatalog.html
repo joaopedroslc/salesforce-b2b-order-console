@@ -1,15 +1,13 @@
 <template>
     <lightning-card title="B2B Warehouse Inventory Catalog" icon-name="standard:product">
-        <div slot="actions" class="slds-grid slds-gutters_x-small">
-            <div class="slds-col">
+        <div slot="actions">
+            <lightning-button-group>
                 <lightning-button
                     label="Seed Demo Data"
                     icon-name="utility:database"
                     onclick={handleSeedCatalog}
                     disabled={isSyncing}
                 ></lightning-button>
-            </div>
-            <div class="slds-col">
                 <lightning-button
                     variant="brand"
                     label="Sync with ERP"
@@ -17,34 +15,36 @@
                     onclick={handleSyncErp}
                     disabled={isSyncing}
                 ></lightning-button>
-            </div>
+            </lightning-button-group>
         </div>
 
-        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
-            <!-- KPI Summary Strip -->
-            <div class="slds-grid slds-wrap slds-gutters_small slds-m-bottom_medium">
+        <div class="slds-card__body slds-card__body_inner">
+            <!-- Native SLDS KPI Summary Strip -->
+            <div class="slds-grid slds-wrap slds-gutters_x-small slds-m-bottom_medium">
                 <div class="slds-col slds-size_1-of-3">
-                    <div class="kpi-box">
-                        <span class="kpi-label">Active SKUs</span>
-                        <span class="kpi-value">{totalSkus}</span>
+                    <div class="slds-box slds-box_x-small slds-theme_shade">
+                        <p class="slds-text-title_caps slds-text-color_weak">Active SKUs</p>
+                        <p class="slds-text-heading_medium slds-text-title_bold">{totalSkus}</p>
                     </div>
                 </div>
                 <div class="slds-col slds-size_1-of-3">
-                    <div class="kpi-box">
-                        <span class="kpi-label">Available Units</span>
-                        <span class="kpi-value">{totalAvailableUnits}</span>
+                    <div class="slds-box slds-box_x-small slds-theme_shade">
+                        <p class="slds-text-title_caps slds-text-color_weak">Available Units</p>
+                        <p class="slds-text-heading_medium slds-text-title_bold">{totalAvailableUnits}</p>
                     </div>
                 </div>
                 <div class="slds-col slds-size_1-of-3">
-                    <div class="kpi-box">
-                        <span class="kpi-label">Low / Out Alerts</span>
-                        <span class="kpi-value kpi-alert">{lowOrOutCount}</span>
+                    <div class="slds-box slds-box_x-small slds-theme_shade">
+                        <p class="slds-text-title_caps slds-text-color_weak">Low / Out Alerts</p>
+                        <p class="slds-text-heading_medium slds-text-title_bold slds-text-color_error">
+                            {lowOrOutCount}
+                        </p>
                     </div>
                 </div>
             </div>
 
-            <!-- Search & Filter Controls -->
-            <div class="slds-grid slds-wrap slds-gutters_small slds-m-bottom_medium">
+            <!-- SLDS Search & Filter Grid -->
+            <div class="slds-grid slds-wrap slds-gutters_x-small slds-m-bottom_medium">
                 <div class="slds-col slds-size_1-of-1 slds-medium-size_7-of-12">
                     <lightning-input
                         type="search"
@@ -66,19 +66,22 @@
                 </div>
             </div>
 
-            <!-- Loading Skeleton -->
+            <!-- SLDS Stencil / Loading Skeleton -->
             <template lwc:if={isLoading}>
-                <div class="skeleton-container" role="status" aria-label="Loading inventory catalog">
-                    <div class="skeleton-row"></div>
-                    <div class="skeleton-row"></div>
-                    <div class="skeleton-row"></div>
+                <div role="status" aria-label="Loading inventory catalog">
+                    <div class="slds-box slds-box_x-small slds-m-bottom_x-small skeleton-stencil"></div>
+                    <div class="slds-box slds-box_x-small slds-m-bottom_x-small skeleton-stencil"></div>
+                    <div class="slds-box slds-box_x-small skeleton-stencil"></div>
                 </div>
             </template>
 
-            <!-- Catalog Table -->
+            <!-- SLDS Data Table -->
             <template lwc:elseif={hasInventoryItems}>
-                <div class="catalog-scroll">
-                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                <div class="slds-scrollable_y catalog-max-height">
+                    <table
+                        class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped slds-table_col-bordered"
+                        aria-label="B2B Warehouse Inventory Catalog"
+                    >
                         <thead>
                             <tr class="slds-line-height_reset">
                                 <th scope="col"><div class="slds-truncate" title="Product &amp; SKU">Product / SKU</div></th>
@@ -93,14 +96,14 @@
                         <tbody>
                             <template for:each={inventoryItems} for:item="item">
                                 <tr key={item.Id} class="slds-hint-parent">
-                                    <td>
+                                    <th scope="row">
                                         <div class="slds-text-title_bold slds-truncate" title={item.productName}>
                                             {item.productName}
                                         </div>
                                         <div class="slds-text-body_small slds-text-color_weak">
                                             {item.External_SKU__c} &bull; {item.productFamily}
                                         </div>
-                                    </td>
+                                    </th>
                                     <td>
                                         <lightning-formatted-number
                                             value={item.Unit_Price__c}
@@ -111,10 +114,10 @@
                                     <td>{item.On_Hand_Quantity__c}</td>
                                     <td>{item.Reserved_Quantity__c}</td>
                                     <td>
-                                        <strong class="avail-qty">{item.Available_Quantity__c}</strong>
+                                        <span class="slds-text-title_bold">{item.Available_Quantity__c}</span>
                                     </td>
                                     <td>
-                                        <span class={item.badgeClass}>{item.Stock_Status__c}</span>
+                                        <span class={item.sldsBadgeClass}>{item.Stock_Status__c}</span>
                                     </td>
                                     <td>
                                         <lightning-button
@@ -133,9 +136,9 @@
                 </div>
             </template>
 
-            <!-- Empty State -->
+            <!-- SLDS Empty State Box -->
             <template lwc:else>
-                <div class="empty-state slds-p-around_large slds-text-align_center">
+                <div class="slds-box slds-theme_shade slds-p-around_large slds-text-align_center">
                     <lightning-icon icon-name="utility:package_org" size="medium" class="slds-m-bottom_small"></lightning-icon>
                     <h3 class="slds-text-heading_small slds-m-bottom_x-small">No Catalog Inventory Found</h3>
                     <p class="slds-text-color_weak slds-m-bottom_medium">

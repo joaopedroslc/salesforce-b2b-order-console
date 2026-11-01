@@ -1,87 +1,24 @@
-.kpi-box {
-    background: #f3f6f9;
-    border: 1px solid #d8dde6;
-    border-radius: 0.375rem;
-    padding: 0.65rem 0.85rem;
-    display: flex;
-    flex-direction: column;
-}
-
-.kpi-label {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    color: #5c5c5c;
-}
-
-.kpi-value {
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: #032d60;
-}
-
-.kpi-alert {
-    color: #ba0517;
-}
-
-.catalog-scroll {
+.catalog-max-height {
     max-height: 26rem;
-    overflow-y: auto;
 }
 
-.avail-qty {
-    color: #032d60;
-}
-
-.status-badge {
-    display: inline-block;
-    padding: 0.15rem 0.55rem;
-    border-radius: 1rem;
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
-.badge-success {
-    background-color: #def9e5;
-    color: #194e31;
-}
-
-.badge-warning {
-    background-color: #fef1cd;
-    color: #8c4b02;
-}
-
-.badge-error {
-    background-color: #fddde3;
-    color: #8e030f;
-}
-
-.skeleton-container {
-    display: flex;
-    flex-direction: column;
-    gap: 0.65rem;
-}
-
-.skeleton-row {
+.skeleton-stencil {
     height: 2.75rem;
-    border-radius: 0.25rem;
-    background: linear-gradient(90deg, #ecebea 25%, #f9f8f7 50%, #ecebea 75%);
+    background: linear-gradient(
+        90deg,
+        var(--lwc-colorBackgroundRowHover, #ecebea) 25%,
+        var(--lwc-colorBackgroundAlt, #ffffff) 50%,
+        var(--lwc-colorBackgroundRowHover, #ecebea) 75%
+    );
     background-size: 200% 100%;
-    animation: shimmer 1.4s infinite;
+    animation: sldsStencilShimmer 1.4s infinite;
 }
 
-@keyframes shimmer {
+@keyframes sldsStencilShimmer {
     0% {
         background-position: 200% 0;
     }
     100% {
         background-position: -200% 0;
     }
-}
-
-.empty-state {
-    border: 1px dashed #c9c9c9;
-    border-radius: 0.5rem;
-    background: #fafaf9;
 }
