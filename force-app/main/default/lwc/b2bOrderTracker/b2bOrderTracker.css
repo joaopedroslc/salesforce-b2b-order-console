@@ -63,6 +63,60 @@
     flex-shrink: 0;
 }
 
+.tracker-filter-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+}
+
+.tracker-search-col,
+.tracker-status-col {
+    min-width: 0;
+}
+
+.active-filter-strip {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    padding: 0.3125rem 0.5rem;
+    border-radius: var(--lwc-borderRadiusMedium, 0.25rem);
+    background-color: var(--lwc-colorBackgroundRowHover, #f3f3f3);
+}
+
+.clear-all-btn {
+    font-size: 0.75rem;
+    margin-left: auto;
+    padding: 0 0.25rem;
+}
+
+.erp-inspect-btn {
+    height: 1.625rem;
+    min-height: 1.625rem;
+    padding: 0 0.375rem;
+    font-size: 0.75rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+}
+
+.erp-inspect-link {
+    padding: 0;
+    text-align: left;
+    color: #0176d3;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+}
+
+.cart-cta-icon {
+    --slds-c-icon-color-foreground-default: #ffffff;
+    --slds-c-icon-color-foreground: #ffffff;
+    --sds-c-icon-color-foreground-default: #ffffff;
+    --sds-c-icon-color-foreground: #ffffff;
+    --lwc-colorTextIconDefault: #ffffff;
+}
+
 .order-top-row {
     display: flex;
     align-items: center;
@@ -124,5 +178,9 @@
 @media (min-width: 768px) {
     .mobile-only-view {
         display: none !important;
+    }
+
+    .tracker-filter-grid {
+        grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
     }
 }

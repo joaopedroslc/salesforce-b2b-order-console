@@ -6,9 +6,18 @@ import B2B_ORDER_CHANNEL from '@salesforce/messageChannel/B2B_Order_Channel__c';
 import getRecentOrders from '@salesforce/apex/B2BOrderConsoleController.getRecentOrders';
 import changeOrderStatus from '@salesforce/apex/B2BOrderConsoleController.changeOrderStatus';
 
+const DEBOUNCE_DELAY = 300;
+
+/**
+ * @description Real-time fulfillment monitor tracking B2B order lifecycles and ERP synchronization.
+ *              Subscribes to Platform Events and Lightning Message Service, with support for
+ *              status filtering, text search, ERP telemetry inspection, and status transitions.
+ */
 export default class B2bOrderTracker extends LightningElement {
     filterAccountId = null;
-    orders = [];
+    rawOrders = [];
+    searchTerm = '';
+    selectedStatusFilter = 'All';
     isLoading = true;
     isProcessing = false;
     empConnected = true;
@@ -16,6 +25,17 @@ export default class B2bOrderTracker extends LightningElement {
     lmsSubscription = null;
     pendingOrderIds = new Set();
     pollTimer = null;
+    searchTimeout = null;
+    isErpModalOpen = false;
+    selectedErpOrder = null;
+
+    statusFilterOptions = [
+        { label: 'All Lifecycles', value: 'All' },
+        { label: 'In-Flight / Pending', value: 'In-Flight' },
+        { label: 'Confirmed by ERP', value: 'Confirmed' },
+        { label: 'Shipped', value: 'Shipped' },
+        { label: 'Drafts', value: 'Draft' }
+    ];
 
     @wire(MessageContext)
     messageContext;
@@ -28,7 +48,7 @@ export default class B2bOrderTracker extends LightningElement {
             const newlyConfirmed = [];
             const currentPending = new Set();
 
-            this.orders = result.data.map((ord) => {
+            this.rawOrders = result.data.map((ord) => {
                 const status = ord.Status__c || 'Draft';
                 const syncStatus = ord.ERP_Sync_Status__c || 'Not Started';
 
@@ -95,6 +115,7 @@ export default class B2bOrderTracker extends LightningElement {
             this.lmsSubscription = null;
         }
         window.clearTimeout(this.pollTimer);
+        window.clearTimeout(this.searchTimeout);
     }
 
     subscribeToLms() {
@@ -130,6 +151,60 @@ export default class B2bOrderTracker extends LightningElement {
                 payload: { source: 'OrderStatusEvent' }
             });
         }, 1800);
+    }
+
+    handleSearchChange(event) {
+        const val = event.target.value;
+        window.clearTimeout(this.searchTimeout);
+        this.searchTimeout = window.setTimeout(() => {
+            this.searchTerm = val;
+        }, DEBOUNCE_DELAY);
+    }
+
+    handleStatusFilterChange(event) {
+        this.selectedStatusFilter = event.detail.value;
+    }
+
+    handleClearSearch() {
+        this.searchTerm = '';
+        const searchInput = this.template.querySelector('lightning-input[type="search"]');
+        if (searchInput) {
+            searchInput.value = '';
+        }
+    }
+
+    handleClearStatusFilter() {
+        this.selectedStatusFilter = 'All';
+    }
+
+    handleResetOrderFilters() {
+        this.searchTerm = '';
+        this.selectedStatusFilter = 'All';
+        const searchInput = this.template.querySelector('lightning-input[type="search"]');
+        if (searchInput) {
+            searchInput.value = '';
+        }
+    }
+
+    handleOpenErpDetails(event) {
+        const orderId = event.currentTarget.dataset.id;
+        const targetOrder = this.rawOrders.find((ord) => ord.Id === orderId);
+        if (targetOrder) {
+            this.selectedErpOrder = targetOrder;
+            this.isErpModalOpen = true;
+        }
+    }
+
+    handleCloseErpDetails() {
+        this.isErpModalOpen = false;
+        this.selectedErpOrder = null;
+    }
+
+    handleNavigateToCatalog() {
+        publish(this.messageContext, B2B_ORDER_CHANNEL, {
+            actionType: 'NAVIGATE_TAB',
+            payload: { tab: 'catalog' }
+        });
     }
 
     async handleRefreshOrders() {
@@ -177,8 +252,50 @@ export default class B2bOrderTracker extends LightningElement {
         }
     }
 
-    get hasOrders() {
-        return this.orders && this.orders.length > 0;
+    get filteredOrders() {
+        if (!this.rawOrders || this.rawOrders.length === 0) {
+            return [];
+        }
+        return this.rawOrders.filter((ord) => {
+            const matchesSearch =
+                !this.searchTerm ||
+                ord.Name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                ord.accountName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                (ord.ERP_Reference_Id__c && ord.ERP_Reference_Id__c.toLowerCase().includes(this.searchTerm.toLowerCase()));
+
+            let matchesStatus = true;
+            if (this.selectedStatusFilter === 'In-Flight') {
+                matchesStatus = ord.Status__c === 'Submitted' || ord.Status__c === 'Confirmed' || ord.Status__c === 'Backordered';
+            } else if (this.selectedStatusFilter !== 'All') {
+                matchesStatus = ord.Status__c === this.selectedStatusFilter;
+            }
+
+            return matchesSearch && matchesStatus;
+        });
+    }
+
+    get hasFilteredOrders() {
+        return this.filteredOrders && this.filteredOrders.length > 0;
+    }
+
+    get hasAnyOrdersInDatabase() {
+        return this.rawOrders && this.rawOrders.length > 0;
+    }
+
+    get hasActiveFilters() {
+        return Boolean(this.searchTerm) || this.selectedStatusFilter !== 'All';
+    }
+
+    get hasSearchTerm() {
+        return Boolean(this.searchTerm);
+    }
+
+    get hasStatusFilter() {
+        return this.selectedStatusFilter !== 'All';
+    }
+
+    get totalOrdersCount() {
+        return this.rawOrders ? this.rawOrders.length : 0;
     }
 
     computeProgressStep(status) {
