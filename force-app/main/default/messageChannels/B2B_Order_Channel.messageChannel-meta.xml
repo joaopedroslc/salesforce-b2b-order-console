@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningMessageChannel xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Lightning Message Channel for decoupled communication between sibling LWCs on the B2B Order &amp; Inventory Console.</description>
+    <isExposed>true</isExposed>
+    <lightningMessageFields>
+        <description>Type of event broadcasted: ADD_TO_ORDER, ORDER_UPDATED, CATALOG_REFRESH, or ACCOUNT_SELECTED.</description>
+        <fieldName>actionType</fieldName>
+    </lightningMessageFields>
+    <lightningMessageFields>
+        <description>Structured payload containing product inventory item, order, or account context.</description>
+        <fieldName>payload</fieldName>
+    </lightningMessageFields>
+    <masterLabel>B2B Order Channel</masterLabel>
+</LightningMessageChannel>
