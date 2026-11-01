@@ -1,21 +1,44 @@
 <template>
-    <lightning-card title="B2B Warehouse Inventory Catalog" icon-name="standard:product">
+    <lightning-card title="B2B Inventory Catalog" icon-name="standard:product">
         <div slot="actions">
-            <lightning-button-group>
-                <lightning-button
-                    label="Seed Demo Data"
-                    icon-name="utility:database"
-                    onclick={handleSeedCatalog}
-                    disabled={isSyncing}
-                ></lightning-button>
-                <lightning-button
-                    variant="brand"
-                    label="Sync with ERP"
-                    icon-name="utility:sync"
-                    onclick={handleSyncErp}
-                    disabled={isSyncing}
-                ></lightning-button>
-            </lightning-button-group>
+            <!-- Desktop Full Action Buttons -->
+            <div class="slds-show_medium">
+                <lightning-button-group>
+                    <lightning-button
+                        label="Seed Demo Data"
+                        icon-name="utility:database"
+                        onclick={handleSeedCatalog}
+                        disabled={isSyncing}
+                    ></lightning-button>
+                    <lightning-button
+                        variant="brand"
+                        label="Sync with ERP"
+                        icon-name="utility:sync"
+                        onclick={handleSyncErp}
+                        disabled={isSyncing}
+                    ></lightning-button>
+                </lightning-button-group>
+            </div>
+            <!-- Mobile Compact Action Buttons (Prevents horizontal overflow on narrow phones) -->
+            <div class="slds-hide_medium">
+                <div class="slds-button-group" role="group">
+                    <lightning-button-icon
+                        icon-name="utility:database"
+                        variant="border-filled"
+                        alternative-text="Seed Demo Data"
+                        title="Seed Demo Data"
+                        onclick={handleSeedCatalog}
+                        disabled={isSyncing}
+                    ></lightning-button-icon>
+                    <lightning-button
+                        variant="brand"
+                        label="ERP Sync"
+                        icon-name="utility:sync"
+                        onclick={handleSyncErp}
+                        disabled={isSyncing}
+                    ></lightning-button>
+                </div>
+            </div>
         </div>
 
         <div class="slds-card__body slds-card__body_inner">
@@ -148,19 +171,20 @@
                             key={item.Id}
                             class="slds-box slds-box_x-small slds-theme_default slds-m-bottom_small"
                         >
-                            <!-- Card Header: Product Name + Status Badge -->
-                            <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-start slds-m-bottom_x-small">
-                                <div class="slds-col slds-has-flexi-truncate slds-p-right_x-small">
-                                    <h3 class="slds-text-title_bold slds-truncate" title={item.productName}>
-                                        {item.productName}
-                                    </h3>
-                                    <p class="slds-text-body_small slds-text-color_weak">
-                                        {item.External_SKU__c} &bull; {item.productFamily}
-                                    </p>
-                                </div>
-                                <div class="slds-col slds-no-flex">
-                                    <span class={item.sldsBadgeClass}>{item.Stock_Status__c}</span>
-                                </div>
+                            <!-- Top Row: SKU Badge + Stock Status Badge -->
+                            <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-m-bottom_xx-small">
+                                <span class="slds-badge slds-badge_lightest">{item.External_SKU__c}</span>
+                                <span class={item.sldsBadgeClass}>{item.Stock_Status__c}</span>
+                            </div>
+
+                            <!-- Full-Width Product Title & Family -->
+                            <div class="slds-m-bottom_x-small">
+                                <h3 class="slds-text-title_bold" title={item.productName}>
+                                    {item.productName}
+                                </h3>
+                                <p class="slds-text-body_small slds-text-color_weak">
+                                    {item.productFamily}
+                                </p>
                             </div>
 
                             <!-- Card Metrics Strip: Unit Price | On Hand / Reserved | Available -->

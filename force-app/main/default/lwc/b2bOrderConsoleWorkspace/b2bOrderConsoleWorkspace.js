@@ -4,11 +4,12 @@ import B2B_ORDER_CHANNEL from '@salesforce/messageChannel/B2B_Order_Channel__c';
 
 /**
  * @description Unified single-drop workspace container for Experience Cloud (LWR/Aura) and Lightning App Pages.
- *              Provides a side-by-side 2-column SLDS desktop workspace and a touch-friendly mobile tab switcher
+ *              Provides a side-by-side 2-column SLDS desktop workspace and a compact mobile switcher
+ *              (showing text only on the active tab and icon-only buttons on inactive tabs)
  *              while keeping all child LWCs mounted in the DOM so LMS state is never lost.
  */
 export default class B2bOrderConsoleWorkspace extends LightningElement {
-    activeMobileTab = 'all';
+    activeMobileTab = 'catalog';
     mobileCartSkus = new Set();
     lmsSubscription = null;
 
@@ -16,10 +17,6 @@ export default class B2bOrderConsoleWorkspace extends LightningElement {
     messageContext;
 
     connectedCallback() {
-        // Default to focused 'catalog' view on narrow mobile screens (< 768px) for optimal UX
-        if (typeof window !== 'undefined' && window.innerWidth < 768) {
-            this.activeMobileTab = 'catalog';
-        }
         this.subscribeToLms();
     }
 
@@ -74,20 +71,20 @@ export default class B2bOrderConsoleWorkspace extends LightningElement {
         return this.mobileCartCount > 0 && this.activeMobileTab === 'catalog';
     }
 
-    get catalogTabVariant() {
-        return this.activeMobileTab === 'catalog' ? 'brand' : 'neutral';
+    get isCatalogTabActive() {
+        return this.activeMobileTab === 'catalog';
     }
 
-    get cartTabVariant() {
-        return this.activeMobileTab === 'cart' ? 'brand' : 'neutral';
+    get isCartTabActive() {
+        return this.activeMobileTab === 'cart';
     }
 
-    get ordersTabVariant() {
-        return this.activeMobileTab === 'orders' ? 'brand' : 'neutral';
+    get isOrdersTabActive() {
+        return this.activeMobileTab === 'orders';
     }
 
-    get allTabVariant() {
-        return this.activeMobileTab === 'all' ? 'brand' : 'neutral';
+    get isAllTabActive() {
+        return this.activeMobileTab === 'all';
     }
 
     get catalogColumnClass() {
