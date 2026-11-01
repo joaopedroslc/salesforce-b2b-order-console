@@ -1,7 +1,6 @@
 <template>
     <lightning-card title="B2B Order Fulfillment" icon-name="standard:fulfillment_order">
         <div slot="actions" class="tracker-header-actions">
-            <!-- Desktop Header Actions (>= 768px) -->
             <div class="desktop-only-view desktop-actions-row">
                 <template lwc:if={empConnected}>
                     <lightning-badge
@@ -17,7 +16,6 @@
                     disabled={isProcessing}
                 ></lightning-button>
             </div>
-            <!-- Mobile Header Action (< 768px): Compact Refresh Icon Only (Zero Header Overflow) -->
             <div class="mobile-only-view">
                 <lightning-button-icon
                     icon-name="utility:refresh"
@@ -31,7 +29,6 @@
         </div>
 
         <div class="slds-card__body slds-card__body_inner tracker-body">
-            <!-- Mobile Status Strip (< 768px) -->
             <template lwc:if={empConnected}>
                 <div class="mobile-only-view slds-m-bottom_small">
                     <lightning-badge
@@ -43,7 +40,6 @@
             </template>
 
             <template lwc:if={hasOrders}>
-                <!-- DESKTOP & TABLET VIEW (>= 768px): High-Density SLDS Table -->
                 <div class="desktop-only-view slds-scrollable_x">
                     <table
                         class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped"
@@ -166,20 +162,17 @@
                     </table>
                 </div>
 
-                <!-- MOBILE VIEW (< 768px): Touch-Optimized SLDS Order Fulfillment Cards -->
                 <div class="mobile-only-view">
                     <template for:each={orders} for:item="ord">
                         <article
                             key={ord.Id}
                             class="slds-box slds-box_x-small slds-theme_default slds-card_boundary slds-m-bottom_small mobile-order-card"
                         >
-                            <!-- Row 1: Order Number Badge + Status Badge -->
                             <div class="order-top-row slds-m-bottom_xx-small">
                                 <span class="slds-badge slds-badge_lightest">{ord.Name}</span>
                                 <span class={ord.statusBadgeClass}>{ord.Status__c}</span>
                             </div>
 
-                            <!-- Row 2: Full-Width Customer Name & Timestamp (Zero Vertical Wrapping) -->
                             <div class="slds-m-bottom_x-small">
                                 <h3 class="slds-text-title_bold order-customer-title">
                                     {ord.accountName}
@@ -196,7 +189,6 @@
                                 </div>
                             </div>
 
-                            <!-- Native SLDS Order Lifecycle Progress Bar -->
                             <template lwc:if={ord.showProgressBar}>
                                 <div class="slds-m-bottom_x-small slds-p-horizontal_xx-small">
                                     <lightning-progress-indicator
@@ -213,7 +205,6 @@
                                 </div>
                             </template>
 
-                            <!-- Row 3: 2-Column Shaded Metrics Strip (ERP Sync/Ref | Total Amount) -->
                             <div class="slds-box slds-box_xx-small slds-theme_shade slds-m-bottom_x-small">
                                 <div class="order-metrics-grid">
                                     <div class="order-metric-cell">
@@ -236,7 +227,6 @@
                                 </div>
                             </div>
 
-                            <!-- Row 4: Line Items Summary -->
                             <template lwc:if={ord.hasLineItems}>
                                 <div class="slds-text-body_small slds-text-color_weak slds-m-bottom_x-small order-lines-box">
                                     <template for:each={ord.lineItems} for:item="li">
@@ -247,7 +237,6 @@
                                 </div>
                             </template>
 
-                            <!-- Row 5: Responsive Wrapping Lifecycle Actions -->
                             <div class="order-actions-row">
                                 <template lwc:if={ord.canSubmit}>
                                     <lightning-button

@@ -31,7 +31,6 @@ public inherited sharing class B2BOrderItemsDomain {
             }
         }
 
-        // 1. Ensure parent orders are in Draft status
         Map<Id, B2B_Order__c> parentOrdersById = new Map<Id, B2B_Order__c>(
             B2BOrdersSelector.selectByIds(orderIds)
         );
@@ -46,7 +45,6 @@ public inherited sharing class B2BOrderItemsDomain {
             }
         }
 
-        // 2. Bulk-resolve Product_Inventory__c by Product__c or explicit Product_Inventory__c
         Map<Id, Product_Inventory__c> inventoryByProductId = new Map<Id, Product_Inventory__c>();
         Map<Id, Product_Inventory__c> inventoryById = new Map<Id, Product_Inventory__c>();
 
@@ -63,7 +61,6 @@ public inherited sharing class B2BOrderItemsDomain {
             }
         }
 
-        // 3. Link inventory, default Unit_Price__c, and aggregate requested quantities per Inventory record
         Map<Id, Decimal> requestedQtyByInventoryId = new Map<Id, Decimal>();
         for (B2B_Order_Item__c item : newItems) {
             Product_Inventory__c resolvedInv = item.Product_Inventory__c != null
@@ -90,7 +87,6 @@ public inherited sharing class B2BOrderItemsDomain {
             }
         }
 
-        // 4. Validate cumulative requested quantity against Available_Quantity__c
         for (B2B_Order_Item__c item : newItems) {
             if (item.Product_Inventory__c != null && requestedQtyByInventoryId.containsKey(item.Product_Inventory__c)) {
                 Product_Inventory__c inv = inventoryById.get(item.Product_Inventory__c);

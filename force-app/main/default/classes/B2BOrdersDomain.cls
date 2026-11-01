@@ -55,7 +55,6 @@ public inherited sharing class B2BOrdersDomain {
                 continue;
             }
 
-            // Terminal statuses cannot transition to any other status
             if (oldOrd.Status__c == STATUS_SHIPPED || oldOrd.Status__c == STATUS_CANCELLED) {
                 ord.Status__c.addError(
                     'Cannot change status of an order that is already ' + oldOrd.Status__c + '.'
@@ -63,13 +62,11 @@ public inherited sharing class B2BOrdersDomain {
                 continue;
             }
 
-            // Cannot revert an active order back to Draft
             if (ord.Status__c == STATUS_DRAFT && oldOrd.Status__c != STATUS_DRAFT) {
                 ord.Status__c.addError('Cannot revert a ' + oldOrd.Status__c + ' order back to Draft.');
                 continue;
             }
 
-            // Submitting an order requires at least 1 line item and transitions from Draft
             if (ord.Status__c == STATUS_SUBMITTED) {
                 if (oldOrd.Status__c != STATUS_DRAFT) {
                     ord.Status__c.addError('Only Draft orders can be transitioned to Submitted.');
@@ -150,7 +147,6 @@ public inherited sharing class B2BOrdersDomain {
         );
         Map<Id, Product_Inventory__c> inventoriesToUpdate = new Map<Id, Product_Inventory__c>();
 
-        // Process reservations, cancellations, and shipments in bulk
         for (Id orderId : allAffectedOrderIds) {
             List<B2B_Order_Item__c> items = itemsByOrderId.get(orderId);
             if (items == null || items.isEmpty()) {

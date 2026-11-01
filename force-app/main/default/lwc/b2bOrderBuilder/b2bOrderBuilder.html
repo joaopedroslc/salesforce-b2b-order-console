@@ -24,7 +24,6 @@
         </div>
 
         <div class="slds-card__body slds-card__body_inner">
-            <!-- Customer Account Selector -->
             <div class="slds-m-bottom_small">
                 <lightning-combobox
                     name="customerAccount"
@@ -37,7 +36,6 @@
                 ></lightning-combobox>
             </div>
 
-            <!-- Cart Line Items (Parent -> Child CustomEvents) -->
             <template lwc:if={hasCartItems}>
                 <div class="slds-scrollable_y cart-max-height slds-m-bottom_medium">
                     <template for:each={cartItems} for:item="line">
@@ -50,7 +48,6 @@
                     </template>
                 </div>
 
-                <!-- Order Notes -->
                 <div class="slds-m-bottom_medium">
                     <lightning-textarea
                         name="orderNotes"
@@ -62,7 +59,6 @@
                     ></lightning-textarea>
                 </div>
 
-                <!-- SLDS Shaded Order Summary Box -->
                 <div class="slds-box slds-box_x-small slds-theme_shade slds-m-bottom_medium">
                     <div class="summary-row">
                         <span class="slds-text-title_caps slds-text-color_weak">
@@ -78,7 +74,6 @@
                     </div>
                 </div>
 
-                <!-- Responsive Action Buttons (Full-Width Grid on Mobile, Right-Aligned on Desktop) -->
                 <div class="builder-actions-grid">
                     <lightning-button
                         label="Save as Draft"
@@ -98,7 +93,6 @@
                 </div>
             </template>
 
-            <!-- SLDS Empty Cart Box -->
             <template lwc:else>
                 <div class="slds-box slds-theme_shade slds-card_boundary slds-p-around_large slds-text-align_center">
                     <div class="slds-m-bottom_small">

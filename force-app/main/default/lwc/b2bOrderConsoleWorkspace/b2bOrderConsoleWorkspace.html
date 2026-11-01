@@ -1,6 +1,5 @@
 <template>
     <div class="workspace-root slds-p-around_x-small">
-        <!-- SLDS Enterprise Portfolio Page Header (Mobile-First Responsive) -->
         <div class="slds-page-header slds-m-bottom_small slds-box slds-theme_default">
             <div class="header-flex">
                 <div class="slds-media slds-media_center">
@@ -40,101 +39,126 @@
             </div>
         </div>
 
-        <!-- MOBILE & TABLET NAVIGATION SWITCHER (< 1024px): Active Tab Shows Text, Inactive Tabs Show Icon Only -->
         <div class="mobile-switcher-bar slds-m-bottom_small">
             <div class="slds-box slds-box_x-small slds-theme_shade">
-                <div class="mobile-nav-row">
-                    <span class="slds-text-title_caps slds-text-color_weak mobile-nav-caption">
-                        Workspace View
-                    </span>
-                    <div class="mobile-tab-strip" role="group" aria-label="Mobile Workspace View Switcher">
-                        <!-- 1. Catalog Tab -->
-                        <template lwc:if={isCatalogTabActive}>
-                            <lightning-button
-                                label="Catalog"
+                <div class="mobile-tab-strip" role="group" aria-label="Workspace View Switcher">
+                    <template lwc:if={isCatalogTabActive}>
+                        <button
+                            type="button"
+                            class="slds-button slds-button_brand mobile-tab-btn mobile-tab-btn_active"
+                            data-tab="catalog"
+                            onclick={handleMobileTabChange}
+                        >
+                            <lightning-icon
                                 icon-name="utility:product"
-                                variant="brand"
-                                data-tab="catalog"
-                                onclick={handleMobileTabChange}
-                            ></lightning-button>
-                        </template>
-                        <template lwc:else>
-                            <lightning-button-icon
-                                icon-name="utility:product"
-                                variant="border-filled"
-                                alternative-text="Catalog"
-                                title="Catalog"
-                                data-tab="catalog"
-                                onclick={handleMobileTabChange}
-                            ></lightning-button-icon>
-                        </template>
+                                size="x-small"
+                                variant="inverse"
+                                class="slds-button__icon slds-button__icon_left"
+                            ></lightning-icon>
+                            <span>Catalog</span>
+                        </button>
+                    </template>
+                    <template lwc:else>
+                        <button
+                            type="button"
+                            class="slds-button slds-button_neutral mobile-tab-btn"
+                            title="Catalog"
+                            aria-label="Catalog"
+                            data-tab="catalog"
+                            onclick={handleMobileTabChange}
+                        >
+                            <lightning-icon icon-name="utility:product" size="x-small"></lightning-icon>
+                        </button>
+                    </template>
 
-                        <!-- 2. Order Cart Tab -->
-                        <template lwc:if={isCartTabActive}>
-                            <lightning-button
-                                label={cartTabLabel}
+                    <template lwc:if={isCartTabActive}>
+                        <button
+                            type="button"
+                            class="slds-button slds-button_brand mobile-tab-btn mobile-tab-btn_active"
+                            data-tab="cart"
+                            onclick={handleMobileTabChange}
+                        >
+                            <lightning-icon
                                 icon-name="utility:cart"
-                                variant="brand"
-                                data-tab="cart"
-                                onclick={handleMobileTabChange}
-                            ></lightning-button>
-                        </template>
-                        <template lwc:else>
-                            <lightning-button-icon
-                                icon-name="utility:cart"
-                                variant="border-filled"
-                                alternative-text={cartTabLabel}
-                                title={cartTabLabel}
-                                data-tab="cart"
-                                onclick={handleMobileTabChange}
-                            ></lightning-button-icon>
-                        </template>
+                                size="x-small"
+                                variant="inverse"
+                                class="slds-button__icon slds-button__icon_left"
+                            ></lightning-icon>
+                            <span>{cartTabLabel}</span>
+                        </button>
+                    </template>
+                    <template lwc:else>
+                        <button
+                            type="button"
+                            class="slds-button slds-button_neutral mobile-tab-btn"
+                            title={cartTabLabel}
+                            aria-label={cartTabLabel}
+                            data-tab="cart"
+                            onclick={handleMobileTabChange}
+                        >
+                            <lightning-icon icon-name="utility:cart" size="x-small"></lightning-icon>
+                        </button>
+                    </template>
 
-                        <!-- 3. Orders Fulfillment Tab -->
-                        <template lwc:if={isOrdersTabActive}>
-                            <lightning-button
-                                label="Orders"
+                    <template lwc:if={isOrdersTabActive}>
+                        <button
+                            type="button"
+                            class="slds-button slds-button_brand mobile-tab-btn mobile-tab-btn_active"
+                            data-tab="orders"
+                            onclick={handleMobileTabChange}
+                        >
+                            <lightning-icon
                                 icon-name="utility:fulfillment_order"
-                                variant="brand"
-                                data-tab="orders"
-                                onclick={handleMobileTabChange}
-                            ></lightning-button>
-                        </template>
-                        <template lwc:else>
-                            <lightning-button-icon
-                                icon-name="utility:fulfillment_order"
-                                variant="border-filled"
-                                alternative-text="Orders"
-                                title="Orders"
-                                data-tab="orders"
-                                onclick={handleMobileTabChange}
-                            ></lightning-button-icon>
-                        </template>
+                                size="x-small"
+                                variant="inverse"
+                                class="slds-button__icon slds-button__icon_left"
+                            ></lightning-icon>
+                            <span>Orders</span>
+                        </button>
+                    </template>
+                    <template lwc:else>
+                        <button
+                            type="button"
+                            class="slds-button slds-button_neutral mobile-tab-btn"
+                            title="Orders"
+                            aria-label="Orders"
+                            data-tab="orders"
+                            onclick={handleMobileTabChange}
+                        >
+                            <lightning-icon icon-name="utility:fulfillment_order" size="x-small"></lightning-icon>
+                        </button>
+                    </template>
 
-                        <!-- 4. All Stacked Tab -->
-                        <template lwc:if={isAllTabActive}>
-                            <lightning-button
-                                label="All"
+                    <template lwc:if={isAllTabActive}>
+                        <button
+                            type="button"
+                            class="slds-button slds-button_brand mobile-tab-btn mobile-tab-btn_active"
+                            data-tab="all"
+                            onclick={handleMobileTabChange}
+                        >
+                            <lightning-icon
                                 icon-name="utility:layout"
-                                variant="brand"
-                                data-tab="all"
-                                onclick={handleMobileTabChange}
-                            ></lightning-button>
-                        </template>
-                        <template lwc:else>
-                            <lightning-button-icon
-                                icon-name="utility:layout"
-                                variant="border-filled"
-                                alternative-text="All Views"
-                                title="All Views"
-                                data-tab="all"
-                                onclick={handleMobileTabChange}
-                            ></lightning-button-icon>
-                        </template>
-                    </div>
+                                size="x-small"
+                                variant="inverse"
+                                class="slds-button__icon slds-button__icon_left"
+                            ></lightning-icon>
+                            <span>All</span>
+                        </button>
+                    </template>
+                    <template lwc:else>
+                        <button
+                            type="button"
+                            class="slds-button slds-button_neutral mobile-tab-btn"
+                            title="All Views"
+                            aria-label="All Views"
+                            data-tab="all"
+                            onclick={handleMobileTabChange}
+                        >
+                            <lightning-icon icon-name="utility:layout" size="x-small"></lightning-icon>
+                        </button>
+                    </template>
                 </div>
 
-                <!-- Mobile Quick-Jump Banner when item is added to cart while on Catalog tab -->
                 <template lwc:if={showMobileCartPrompt}>
                     <div class="slds-box slds-box_xx-small slds-theme_info slds-m-top_x-small mobile-cart-banner">
                         <span class="slds-text-body_small">
@@ -151,14 +175,11 @@
             </div>
         </div>
 
-        <!-- Main Responsive 2-Column Workspace Grid (Always Mounted to Preserve LMS State) -->
         <div class="workspace-grid">
-            <!-- Left Column: Warehouse Inventory Catalog -->
             <div class={catalogColumnClass}>
                 <c-b2b-inventory-catalog></c-b2b-inventory-catalog>
             </div>
 
-            <!-- Right Column: Interactive Order Builder + Real-Time Fulfillment Monitor -->
             <div class={rightColumnClass}>
                 <div class={builderWrapperClass}>
                     <c-b2b-order-builder></c-b2b-order-builder>

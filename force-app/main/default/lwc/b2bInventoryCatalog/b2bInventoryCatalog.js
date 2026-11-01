@@ -80,7 +80,6 @@ export default class B2bInventoryCatalog extends LightningElement {
         ) {
             this.refreshCatalog();
             if (message.actionType === 'ORDER_UPDATED') {
-                // eslint-disable-next-line @lwc/lwc/no-async-operation
                 window.setTimeout(() => {
                     this.refreshCatalog();
                 }, 2400);
@@ -91,7 +90,6 @@ export default class B2bInventoryCatalog extends LightningElement {
     handleSearchChange(event) {
         const value = event.target.value;
         window.clearTimeout(this.searchTimeout);
-        // eslint-disable-next-line @lwc/lwc/no-async-operation
         this.searchTimeout = window.setTimeout(() => {
             this.isLoading = true;
             this.searchTerm = value;

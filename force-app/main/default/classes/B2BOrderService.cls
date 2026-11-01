@@ -192,7 +192,6 @@ public inherited sharing class B2BOrderService implements Callable {
         List<B2B_Order__c> ordersToUpdate = new List<B2B_Order__c>();
 
         for (B2B_Order__c ord : existingOrders) {
-            // Do not overwrite orders already Shipped or Cancelled
             if (
                 ord.Status__c == B2BOrdersDomain.STATUS_SHIPPED ||
                 ord.Status__c == B2BOrdersDomain.STATUS_CANCELLED

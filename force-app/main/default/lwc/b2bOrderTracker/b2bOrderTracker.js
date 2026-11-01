@@ -68,7 +68,6 @@ export default class B2bOrderTracker extends LightningElement {
 
             this.pendingOrderIds = currentPending;
 
-            // Notify user when an Order_Status_Event__e Platform Event transitions a Pending order
             newlyConfirmed.forEach((ord) => {
                 const ref = ord.ERP_Reference_Id__c ? ` (${ord.ERP_Reference_Id__c})` : '';
                 this.showToast(
@@ -124,7 +123,6 @@ export default class B2bOrderTracker extends LightningElement {
 
     schedulePendingOrderPoll() {
         window.clearTimeout(this.pollTimer);
-        // eslint-disable-next-line @lwc/lwc/no-async-operation
         this.pollTimer = window.setTimeout(async () => {
             await this.handleRefreshOrders();
             publish(this.messageContext, B2B_ORDER_CHANNEL, {

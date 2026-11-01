@@ -1,7 +1,6 @@
 <template>
     <template lwc:if={item}>
         <div class="slds-box slds-box_x-small slds-theme_default slds-card_boundary slds-m-bottom_x-small line-item-card">
-            <!-- Row 1: Product Title & SKU / Max Available -->
             <div class="slds-m-bottom_x-small">
                 <div class="slds-text-title_bold line-product-name" title={item.productName}>
                     {item.productName}
@@ -17,7 +16,6 @@
                 </template>
             </div>
 
-            <!-- Row 2: Quantity Stepper + Remove Icon -->
             <div class="qty-controls-row slds-m-bottom_x-small">
                 <div class="qty-stepper">
                     <lightning-button-icon
@@ -54,7 +52,6 @@
                 ></lightning-button-icon>
             </div>
 
-            <!-- Row 3: Dedicated Price Line Below Quantity (Unit Price & Extended Line Total) -->
             <div class="price-summary-row">
                 <span class="slds-text-body_small slds-text-color_weak">
                     <lightning-formatted-number

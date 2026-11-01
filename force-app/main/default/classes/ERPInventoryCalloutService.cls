@@ -151,7 +151,6 @@ public inherited sharing class ERPInventoryCalloutService {
                     mockOverridesBySku.get(inv.External_SKU__c)
                 );
             } else {
-                // If an item is low or out of stock during a live demo, ERP auto-replenishes +25 units
                 Decimal currentAvailable = inv.On_Hand_Quantity__c - inv.Reserved_Quantity__c;
                 Decimal threshold = inv.Reorder_Threshold__c != null ? inv.Reorder_Threshold__c : 10;
                 stockResult.onHandQuantity = currentAvailable <= threshold

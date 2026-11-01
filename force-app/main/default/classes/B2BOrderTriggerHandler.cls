@@ -22,7 +22,6 @@ public inherited sharing class B2BOrderTriggerHandler extends TriggerHandler {
             (Map<Id, B2B_Order__c>) Trigger.oldMap
         );
 
-        // Filter out any order IDs already queued in this transaction (recursion guard)
         Set<Id> idsToEnqueue = new Set<Id>();
         for (Id ordId : newlySubmittedIds) {
             if (!processedSubmittedOrderIds.contains(ordId)) {

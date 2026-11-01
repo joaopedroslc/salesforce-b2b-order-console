@@ -59,33 +59,37 @@ public virtual inherited sharing class TriggerHandler {
         }
     }
 
-    // =========================================================================
-    // Static Bypass API
-    // =========================================================================
-
+    /**
+     * @description Bypasses trigger execution for the specified handler class name.
+     */
     public static void bypass(String handlerName) {
         if (String.isNotBlank(handlerName)) {
             bypassedHandlers.add(handlerName);
         }
     }
 
+    /**
+     * @description Clears the bypass for the specified handler class name.
+     */
     public static void clearBypass(String handlerName) {
         if (String.isNotBlank(handlerName)) {
             bypassedHandlers.remove(handlerName);
         }
     }
 
+    /**
+     * @description Returns true if the specified handler class is currently bypassed.
+     */
     public static Boolean isBypassed(String handlerName) {
         return bypassedHandlers.contains(handlerName);
     }
 
+    /**
+     * @description Clears all active handler bypasses.
+     */
     public static void clearAllBypasses() {
         bypassedHandlers.clear();
     }
-
-    // =========================================================================
-    // Virtual Context Hooks (Override in Concrete Handlers)
-    // =========================================================================
 
     @SuppressWarnings('PMD.EmptyStatementBlock')
     protected virtual void beforeInsert() {
@@ -114,10 +118,6 @@ public virtual inherited sharing class TriggerHandler {
     @SuppressWarnings('PMD.EmptyStatementBlock')
     protected virtual void afterUndelete() {
     }
-
-    // =========================================================================
-    // Internal Context Resolution
-    // =========================================================================
 
     @TestVisible
     private void setTriggerContext() {

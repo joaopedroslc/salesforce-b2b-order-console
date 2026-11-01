@@ -50,7 +50,7 @@ public class ERPInventoryHttpCalloutMock implements HttpCalloutMock {
     }
 
     public HttpResponse respond(HttpRequest req) {
-        System.assertNotEquals(null, req.getEndpoint(), 'Endpoint must be populated on outbound ERP request.');
+        Assert.isNotNull(req.getEndpoint(), 'Endpoint must be populated on outbound ERP request.');
         HttpResponse res = new HttpResponse();
         res.setHeader('Content-Type', 'application/json');
         res.setStatusCode(this.statusCode);
