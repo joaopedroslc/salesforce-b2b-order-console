@@ -49,8 +49,16 @@
                 </button>
             </div>
 
-            <div class="kpi-grid slds-m-bottom_small">
-                <div class="slds-box slds-box_x-small slds-theme_shade slds-card_boundary kpi-card">
+            <div class="kpi-grid slds-m-bottom_small" role="toolbar" aria-label="Quick Stock Filters">
+                <div
+                    class={kpiAllClass}
+                    role="button"
+                    tabindex="0"
+                    title="View All SKUs"
+                    data-filter="all"
+                    onclick={handleKpiClick}
+                    onkeydown={handleKpiKeyDown}
+                >
                     <div class="slds-media slds-media_center">
                         <div class="slds-media__figure desktop-only-view">
                             <lightning-icon
@@ -80,7 +88,15 @@
                         </div>
                     </div>
                 </div>
-                <div class="slds-box slds-box_x-small slds-theme_shade slds-card_boundary kpi-card">
+                <div
+                    class={kpiAlertsClass}
+                    role="button"
+                    tabindex="0"
+                    title="Filter by Alerts (Low or Out of Stock)"
+                    data-filter="alerts"
+                    onclick={handleKpiClick}
+                    onkeydown={handleKpiKeyDown}
+                >
                     <div class="slds-media slds-media_center">
                         <div class="slds-media__figure desktop-only-view">
                             <lightning-icon
@@ -100,16 +116,17 @@
             </div>
 
             <div class="filter-grid slds-m-bottom_small">
-                <div>
+                <div class="filter-col">
                     <lightning-input
                         type="search"
                         label="Search Catalog"
                         variant="label-hidden"
-                        placeholder="Search by Product, Code, or SKU..."
+                        placeholder="Search Product, Code, SKU..."
+                        value={searchTerm}
                         onchange={handleSearchChange}
                     ></lightning-input>
                 </div>
-                <div>
+                <div class="filter-col">
                     <lightning-combobox
                         name="stockStatus"
                         label="Filter Stock Status"
@@ -119,7 +136,56 @@
                         onchange={handleStatusChange}
                     ></lightning-combobox>
                 </div>
+                <div class="filter-col">
+                    <lightning-combobox
+                        name="catalogSort"
+                        label="Sort Catalog By"
+                        variant="label-hidden"
+                        value={selectedSort}
+                        options={sortOptions}
+                        onchange={handleSortChange}
+                    ></lightning-combobox>
+                </div>
             </div>
+
+            <template lwc:if={showFilterPills}>
+                <div class="active-filter-strip slds-m-bottom_small">
+                    <span class="slds-text-body_small slds-text-color_weak slds-m-right_xx-small">Filters:</span>
+                    <template lwc:if={hasSearchTerm}>
+                        <span class="slds-pill slds-m-right_xx-small">
+                            <span class="slds-pill__label">&ldquo;{searchTerm}&rdquo;</span>
+                            <button
+                                type="button"
+                                class="slds-button slds-button_icon slds-pill__remove"
+                                title="Remove Search Filter"
+                                onclick={handleClearSearch}
+                            >
+                                <lightning-icon icon-name="utility:close" size="xx-small" alternative-text="Remove"></lightning-icon>
+                            </button>
+                        </span>
+                    </template>
+                    <template lwc:if={hasStatusFilter}>
+                        <span class="slds-pill slds-m-right_xx-small">
+                            <span class="slds-pill__label">{selectedStatus}</span>
+                            <button
+                                type="button"
+                                class="slds-button slds-button_icon slds-pill__remove"
+                                title="Remove Status Filter"
+                                onclick={handleClearStatus}
+                            >
+                                <lightning-icon icon-name="utility:close" size="xx-small" alternative-text="Remove"></lightning-icon>
+                            </button>
+                        </span>
+                    </template>
+                    <button
+                        type="button"
+                        class="slds-button slds-button_destructive-text clear-all-btn"
+                        onclick={handleResetFilters}
+                    >
+                        Reset All
+                    </button>
+                </div>
+            </template>
 
             <template lwc:if={isLoading}>
                 <div role="status" aria-label="Loading inventory catalog">
@@ -147,7 +213,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <template for:each={inventoryItems} for:item="item">
+                            <template for:each={sortedInventoryItems} for:item="item">
                                 <tr key={item.Id} class="slds-hint-parent">
                                     <th scope="row">
                                         <div class="slds-text-title_bold slds-truncate" title={item.productName}>
@@ -173,14 +239,26 @@
                                         <span class={item.sldsBadgeClass}>{item.Stock_Status__c}</span>
                                     </td>
                                     <td>
-                                        <lightning-button
-                                            label="Add to Order"
-                                            icon-name="utility:add"
-                                            variant="neutral"
-                                            data-id={item.Id}
-                                            onclick={handleAddToOrder}
-                                            disabled={item.isOutOfStock}
-                                        ></lightning-button>
+                                        <template lwc:if={item.isOutOfStock}>
+                                            <button
+                                                type="button"
+                                                class="slds-button slds-button_neutral action-backorder-btn"
+                                                disabled
+                                                title="Zero stock available - backorder required"
+                                            >
+                                                <lightning-icon icon-name="utility:clock" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                                <span>Backorder</span>
+                                            </button>
+                                        </template>
+                                        <template lwc:else>
+                                            <lightning-button
+                                                label="Add to Order"
+                                                icon-name="utility:add"
+                                                variant="neutral"
+                                                data-id={item.Id}
+                                                onclick={handleAddToOrder}
+                                            ></lightning-button>
+                                        </template>
                                     </td>
                                 </tr>
                             </template>
@@ -189,7 +267,7 @@
                 </div>
 
                 <div class="mobile-only-view">
-                    <template for:each={inventoryItems} for:item="item">
+                    <template for:each={sortedInventoryItems} for:item="item">
                         <article
                             key={item.Id}
                             class="slds-box slds-box_x-small slds-theme_default slds-card_boundary slds-m-bottom_small mobile-product-card"
@@ -221,7 +299,7 @@
                                         </div>
                                     </div>
                                     <div class="metric-cell slds-border_left slds-border_right">
-                                        <div class="metric-caption slds-text-color_weak">OH / Res</div>
+                                        <div class="metric-caption slds-text-color_weak">On Hand / Rsvd</div>
                                         <div class="slds-text-body_regular metric-nowrap">
                                             {item.On_Hand_Quantity__c} / {item.Reserved_Quantity__c}
                                         </div>
@@ -234,15 +312,26 @@
                             </div>
 
                             <div class="full-width-cta">
-                                <lightning-button
-                                    label="Add to Order"
-                                    icon-name="utility:add"
-                                    variant="brand"
-                                    stretch
-                                    data-id={item.Id}
-                                    onclick={handleAddToOrder}
-                                    disabled={item.isOutOfStock}
-                                ></lightning-button>
+                                <template lwc:if={item.isOutOfStock}>
+                                    <button
+                                        type="button"
+                                        class="slds-button slds-button_neutral out-of-stock-btn"
+                                        disabled
+                                    >
+                                        <lightning-icon icon-name="utility:clock" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                        <span>Out of Stock (Backorder)</span>
+                                    </button>
+                                </template>
+                                <template lwc:else>
+                                    <lightning-button
+                                        label="Add to Order"
+                                        icon-name="utility:add"
+                                        variant="brand"
+                                        stretch
+                                        data-id={item.Id}
+                                        onclick={handleAddToOrder}
+                                    ></lightning-button>
+                                </template>
                             </div>
                         </article>
                     </template>
@@ -250,22 +339,45 @@
             </template>
 
             <template lwc:else>
-                <div class="slds-box slds-theme_shade slds-card_boundary slds-p-around_large slds-text-align_center">
-                    <div class="slds-m-bottom_small">
-                        <lightning-icon icon-name="standard:product" size="large" alternative-text="No Catalog Inventory"></lightning-icon>
+                <template lwc:if={isDatabaseEmpty}>
+                    <div class="slds-box slds-theme_shade slds-card_boundary slds-p-around_large slds-text-align_center">
+                        <div class="slds-m-bottom_small">
+                            <lightning-icon icon-name="standard:product" size="large" alternative-text="No Catalog Inventory"></lightning-icon>
+                        </div>
+                        <h3 class="slds-text-heading_small slds-m-bottom_xx-small">No Catalog Inventory Found</h3>
+                        <p class="slds-text-body_regular slds-text-color_weak slds-m-bottom_medium">
+                            Click &ldquo;Seed Data&rdquo; to populate sample B2B Accounts, Products, and Warehouse Stock.
+                        </p>
+                        <button
+                            type="button"
+                            class="slds-button slds-button_brand"
+                            onclick={handleSeedCatalog}
+                            disabled={isSyncing}
+                        >
+                            <lightning-icon icon-name="utility:database" size="x-small" class="slds-button__icon slds-button__icon_left seed-cta-icon"></lightning-icon>
+                            <span>Seed Sample B2B Catalog</span>
+                        </button>
                     </div>
-                    <h3 class="slds-text-heading_small slds-m-bottom_xx-small">No Catalog Inventory Found</h3>
-                    <p class="slds-text-body_regular slds-text-color_weak slds-m-bottom_medium">
-                        Click &ldquo;Seed Data&rdquo; to populate sample B2B Accounts, Products, and Warehouse Stock.
-                    </p>
-                    <lightning-button
-                        variant="brand"
-                        label="Seed Sample B2B Catalog"
-                        icon-name="utility:database"
-                        onclick={handleSeedCatalog}
-                        disabled={isSyncing}
-                    ></lightning-button>
-                </div>
+                </template>
+                <template lwc:else>
+                    <div class="slds-box slds-theme_shade slds-card_boundary slds-p-around_large slds-text-align_center">
+                        <div class="slds-m-bottom_small">
+                            <lightning-icon icon-name="utility:search" size="large" alternative-text="No Matching Products"></lightning-icon>
+                        </div>
+                        <h3 class="slds-text-heading_small slds-m-bottom_xx-small">No Matching Products Found</h3>
+                        <p class="slds-text-body_regular slds-text-color_weak slds-m-bottom_medium">
+                            No warehouse inventory matches your active search or stock filters.
+                        </p>
+                        <button
+                            type="button"
+                            class="slds-button slds-button_neutral"
+                            onclick={handleResetFilters}
+                        >
+                            <lightning-icon icon-name="utility:clear" size="x-small" class="slds-button__icon slds-button__icon_left reset-cta-icon"></lightning-icon>
+                            <span>Reset All Filters</span>
+                        </button>
+                    </div>
+                </template>
             </template>
         </div>
     </article>
