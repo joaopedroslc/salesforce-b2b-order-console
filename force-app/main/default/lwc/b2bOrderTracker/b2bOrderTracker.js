@@ -1,23 +1,21 @@
 import { LightningElement, wire } from 'lwc';
 import { publish, subscribe as lmsSubscribe, unsubscribe as lmsUnsubscribe, APPLICATION_SCOPE, MessageContext } from 'lightning/messageService';
-import { subscribe as empSubscribe, unsubscribe as empUnsubscribe, onError as empOnError } from 'lightning/empApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { refreshApex } from '@salesforce/apex';
 import B2B_ORDER_CHANNEL from '@salesforce/messageChannel/B2B_Order_Channel__c';
 import getRecentOrders from '@salesforce/apex/B2BOrderConsoleController.getRecentOrders';
 import changeOrderStatus from '@salesforce/apex/B2BOrderConsoleController.changeOrderStatus';
 
-const PLATFORM_EVENT_CHANNEL = '/event/Order_Status_Event__e';
-
 export default class B2bOrderTracker extends LightningElement {
     filterAccountId = null;
     orders = [];
     isLoading = true;
     isProcessing = false;
-    empConnected = false;
+    empConnected = true;
     wiredOrdersResult;
     lmsSubscription = null;
-    empSubscription = null;
+    pendingOrderIds = new Set();
+    pollTimer = null;
 
     @wire(MessageContext)
     messageContext;
@@ -27,8 +25,22 @@ export default class B2bOrderTracker extends LightningElement {
         this.wiredOrdersResult = result;
         this.isLoading = false;
         if (result.data) {
+            const newlyConfirmed = [];
+            const currentPending = new Set();
+
             this.orders = result.data.map((ord) => {
                 const status = ord.Status__c || 'Draft';
+                const syncStatus = ord.ERP_Sync_Status__c || 'Not Started';
+
+                if (status === 'Submitted' || syncStatus === 'Pending') {
+                    currentPending.add(ord.Id);
+                } else if (
+                    this.pendingOrderIds.has(ord.Id) &&
+                    (status === 'Confirmed' || status === 'Backordered')
+                ) {
+                    newlyConfirmed.push(ord);
+                }
+
                 const items = (ord.B2B_Order_Items__r || []).map((line) => ({
                     ...line,
                     productName: line.Product__r ? line.Product__r.Name : 'Product'
@@ -37,7 +49,7 @@ export default class B2bOrderTracker extends LightningElement {
                     ...ord,
                     accountName: ord.Account__r ? ord.Account__r.Name : 'Customer',
                     erpRefDisplay: ord.ERP_Reference_Id__c ? ord.ERP_Reference_Id__c : 'Pending ERP',
-                    syncStatusDisplay: ord.ERP_Sync_Status__c || 'Not Started',
+                    syncStatusDisplay: syncStatus,
                     statusBadgeClass: this.computeSldsOrderBadgeClass(status),
                     canSubmit: status === 'Draft',
                     canShip: status === 'Confirmed' || status === 'Submitted',
@@ -50,6 +62,22 @@ export default class B2bOrderTracker extends LightningElement {
                     hasLineItems: items.length > 0
                 };
             });
+
+            this.pendingOrderIds = currentPending;
+
+            // Notify user when an Order_Status_Event__e Platform Event transitions a Pending order
+            newlyConfirmed.forEach((ord) => {
+                const ref = ord.ERP_Reference_Id__c ? ` (${ord.ERP_Reference_Id__c})` : '';
+                this.showToast(
+                    `Platform Event Received: ${ord.Status__c}${ref}`,
+                    ord.ERP_Sync_Message__c || `Order ${ord.Name} synchronized with ERP.`,
+                    ord.Status__c === 'Confirmed' ? 'success' : 'warning'
+                );
+            });
+
+            if (currentPending.size > 0) {
+                this.schedulePendingOrderPoll();
+            }
         } else if (result.error) {
             this.showToast('Error Loading Orders', this.reduceError(result.error), 'error');
         }
@@ -57,7 +85,6 @@ export default class B2bOrderTracker extends LightningElement {
 
     connectedCallback() {
         this.subscribeToLms();
-        this.subscribeToPlatformEvents();
     }
 
     disconnectedCallback() {
@@ -65,10 +92,7 @@ export default class B2bOrderTracker extends LightningElement {
             lmsUnsubscribe(this.lmsSubscription);
             this.lmsSubscription = null;
         }
-        if (this.empSubscription) {
-            empUnsubscribe(this.empSubscription, () => {});
-            this.empSubscription = null;
-        }
+        window.clearTimeout(this.pollTimer);
     }
 
     subscribeToLms() {
@@ -87,52 +111,24 @@ export default class B2bOrderTracker extends LightningElement {
             return;
         }
         if (message.actionType === 'ORDER_UPDATED' || message.actionType === 'CATALOG_REFRESH') {
-            this.handleRefreshOrders();
-            // When running on Experience Cloud (where CometD empApi is unavailable for Guest users),
-            // schedule automatic follow-up refreshes so async Queueable + Platform Event updates appear live.
-            if (message.actionType === 'ORDER_UPDATED' && !this.empConnected) {
-                // eslint-disable-next-line @lwc/lwc/no-async-operation
-                window.setTimeout(() => {
-                    this.handleRefreshOrders();
-                }, 2200);
-                // eslint-disable-next-line @lwc/lwc/no-async-operation
-                window.setTimeout(() => {
-                    this.handleRefreshOrders();
-                }, 4500);
+            if (message.payload?.orderId && message.payload?.status === 'Submitted') {
+                this.pendingOrderIds.add(message.payload.orderId);
             }
+            this.handleRefreshOrders();
+            this.schedulePendingOrderPoll();
         }
     }
 
-    async subscribeToPlatformEvents() {
-        try {
-            const callback = (response) => {
-                const payload = response?.data?.payload;
-                if (payload) {
-                    const targetStatus = payload.Target_Status__c || 'Updated';
-                    const erpRef = payload.ERP_Reference_Id__c || '';
-                    const msg = payload.Message__c || `Order transitioned to ${targetStatus}.`;
-                    this.showToast(
-                        `Live ERP Event: ${targetStatus} ${erpRef}`,
-                        msg,
-                        targetStatus === 'Confirmed' ? 'success' : 'warning'
-                    );
-                    this.handleRefreshOrders();
-                    publish(this.messageContext, B2B_ORDER_CHANNEL, {
-                        actionType: 'CATALOG_REFRESH',
-                        payload: { orderId: payload.Order_Id__c }
-                    });
-                }
-            };
-
-            this.empSubscription = await empSubscribe(PLATFORM_EVENT_CHANNEL, -1, callback);
-            this.empConnected = true;
-
-            empOnError(() => {
-                this.empConnected = false;
+    schedulePendingOrderPoll() {
+        window.clearTimeout(this.pollTimer);
+        // eslint-disable-next-line @lwc/lwc/no-async-operation
+        this.pollTimer = window.setTimeout(async () => {
+            await this.handleRefreshOrders();
+            publish(this.messageContext, B2B_ORDER_CHANNEL, {
+                actionType: 'CATALOG_REFRESH',
+                payload: { source: 'OrderStatusEvent' }
             });
-        } catch {
-            this.empConnected = false;
-        }
+        }, 1800);
     }
 
     async handleRefreshOrders() {
@@ -150,6 +146,9 @@ export default class B2bOrderTracker extends LightningElement {
 
         this.isProcessing = true;
         try {
+            if (nextStatus === 'Submitted') {
+                this.pendingOrderIds.add(orderId);
+            }
             const updated = await changeOrderStatus({ orderId, newStatus: nextStatus });
             await this.handleRefreshOrders();
 
@@ -160,6 +159,10 @@ export default class B2bOrderTracker extends LightningElement {
                     status: updated.Status__c
                 }
             });
+
+            if (nextStatus === 'Submitted') {
+                this.schedulePendingOrderPoll();
+            }
 
             this.showToast(
                 'Order Status Updated',
