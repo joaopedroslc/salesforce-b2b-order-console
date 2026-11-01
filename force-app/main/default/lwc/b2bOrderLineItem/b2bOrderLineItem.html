@@ -1,25 +1,25 @@
 <template>
     <template lwc:if={item}>
-        <div class="slds-box slds-box_x-small slds-theme_default slds-m-bottom_x-small">
-            <div class="slds-grid slds-grid_vertical-align-center slds-wrap">
-                <!-- Product Info -->
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-m-bottom_xx-small">
-                    <div class="slds-text-title_bold slds-truncate" title={item.productName}>
-                        {item.productName}
-                    </div>
-                    <div class="slds-text-body_small slds-text-color_weak">
-                        <span class="slds-badge slds-badge_lightest slds-m-right_xx-small">{item.externalSku}</span>
-                        Max Avail: {item.availableQuantity}
-                    </div>
-                    <template lwc:if={hasStockError}>
-                        <div class="slds-text-color_error slds-text-body_small slds-m-top_xx-small">
-                            Exceeds available stock ({item.availableQuantity})
-                        </div>
-                    </template>
+        <div class="slds-box slds-box_x-small slds-theme_default slds-m-bottom_x-small line-item-card">
+            <!-- Row 1: Product Title & SKU / Max Available -->
+            <div class="slds-m-bottom_x-small">
+                <div class="slds-text-title_bold line-product-name" title={item.productName}>
+                    {item.productName}
                 </div>
+                <div class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">
+                    <span class="slds-badge slds-badge_lightest slds-m-right_xx-small">{item.externalSku}</span>
+                    <span>Max Avail: {item.availableQuantity}</span>
+                </div>
+                <template lwc:if={hasStockError}>
+                    <div class="slds-text-color_error slds-text-body_small slds-m-top_xx-small">
+                        Exceeds available stock ({item.availableQuantity})
+                    </div>
+                </template>
+            </div>
 
-                <!-- SLDS Quantity Stepper -->
-                <div class="slds-col slds-size_1-of-2 slds-medium-size_3-of-12 slds-grid slds-grid_vertical-align-center slds-p-top_xx-small">
+            <!-- Row 2: Quantity Stepper + Remove Icon -->
+            <div class="qty-controls-row slds-m-bottom_x-small">
+                <div class="qty-stepper">
                     <lightning-button-icon
                         icon-name="utility:dash"
                         alternative-text="Decrease quantity"
@@ -29,7 +29,7 @@
                     ></lightning-button-icon>
                     <input
                         type="number"
-                        class="slds-input slds-text-align_center slds-m-horizontal_xx-small qty-field"
+                        class="slds-input slds-text-align_center qty-field"
                         value={item.quantity}
                         min="1"
                         max={item.availableQuantity}
@@ -45,33 +45,32 @@
                     ></lightning-button-icon>
                 </div>
 
-                <!-- Extended Line Total & Remove -->
-                <div class="slds-col slds-size_1-of-2 slds-medium-size_4-of-12 slds-grid slds-grid_align-end slds-grid_vertical-align-center">
-                    <div class="slds-text-align_right slds-m-right_small">
-                        <div class="slds-text-title_bold">
-                            <lightning-formatted-number
-                                value={lineTotal}
-                                format-style="currency"
-                                currency-code="USD"
-                            ></lightning-formatted-number>
-                        </div>
-                        <div class="slds-text-body_small slds-text-color_weak">
-                            <lightning-formatted-number
-                                value={item.unitPrice}
-                                format-style="currency"
-                                currency-code="USD"
-                            ></lightning-formatted-number>
-                            / unit
-                        </div>
-                    </div>
-                    <lightning-button-icon
-                        icon-name="utility:delete"
-                        variant="border-filled"
-                        alternative-text="Remove line item"
-                        title="Remove line item"
-                        onclick={handleRemove}
-                    ></lightning-button-icon>
-                </div>
+                <lightning-button-icon
+                    icon-name="utility:delete"
+                    variant="border-filled"
+                    alternative-text="Remove line item"
+                    title="Remove line item"
+                    onclick={handleRemove}
+                ></lightning-button-icon>
+            </div>
+
+            <!-- Row 3: Dedicated Price Line Below Quantity (Unit Price & Extended Line Total) -->
+            <div class="price-summary-row">
+                <span class="slds-text-body_small slds-text-color_weak">
+                    <lightning-formatted-number
+                        value={item.unitPrice}
+                        format-style="currency"
+                        currency-code="USD"
+                    ></lightning-formatted-number>
+                    / unit
+                </span>
+                <span class="slds-text-title_bold">
+                    <lightning-formatted-number
+                        value={lineTotal}
+                        format-style="currency"
+                        currency-code="USD"
+                    ></lightning-formatted-number>
+                </span>
             </div>
         </div>
     </template>

@@ -2,12 +2,24 @@
     <lightning-card title="B2B Order Builder" icon-name="standard:orders">
         <div slot="actions">
             <template lwc:if={hasCartItems}>
-                <lightning-button
-                    label="Clear Cart"
-                    icon-name="utility:clear"
-                    onclick={handleClearCart}
-                    disabled={isSubmitting}
-                ></lightning-button>
+                <div class="desktop-clear-btn">
+                    <lightning-button
+                        label="Clear Cart"
+                        icon-name="utility:clear"
+                        onclick={handleClearCart}
+                        disabled={isSubmitting}
+                    ></lightning-button>
+                </div>
+                <div class="mobile-clear-btn">
+                    <lightning-button-icon
+                        icon-name="utility:clear"
+                        variant="border-filled"
+                        alternative-text="Clear Cart"
+                        title="Clear Cart"
+                        onclick={handleClearCart}
+                        disabled={isSubmitting}
+                    ></lightning-button-icon>
+                </div>
             </template>
         </div>
 
