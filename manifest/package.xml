@@ -25,8 +25,35 @@
         <name>AuraDefinitionBundle</name>
     </types>
     <types>
+        <members>Product_Inventory__c</members>
+        <members>B2B_Order__c</members>
+        <members>B2B_Order_Item__c</members>
+        <members>Order_Status_Event__e</members>
+        <name>CustomObject</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>CustomTab</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>FlexiPage</name>
+    </types>
+    <types>
         <members>*</members>
         <name>LightningComponentBundle</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>LightningMessageChannel</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>NamedCredential</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>PermissionSet</name>
     </types>
     <types>
         <members>*</members>
