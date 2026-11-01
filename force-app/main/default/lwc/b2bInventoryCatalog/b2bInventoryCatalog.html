@@ -19,33 +19,39 @@
         </div>
 
         <div class="slds-card__body slds-card__body_inner">
-            <!-- Native SLDS KPI Summary Strip -->
-            <div class="slds-grid slds-wrap slds-gutters_x-small slds-m-bottom_medium">
+            <!-- Native SLDS KPI Summary Strip (Responsive Mobile + Desktop) -->
+            <div class="slds-grid slds-wrap slds-gutters_xx-small slds-m-bottom_small">
                 <div class="slds-col slds-size_1-of-3">
-                    <div class="slds-box slds-box_x-small slds-theme_shade">
-                        <p class="slds-text-title_caps slds-text-color_weak">Active SKUs</p>
-                        <p class="slds-text-heading_medium slds-text-title_bold">{totalSkus}</p>
+                    <div class="slds-box slds-box_x-small slds-theme_shade slds-text-align_center">
+                        <p class="slds-text-title_caps slds-text-color_weak slds-truncate" title="Active SKUs">
+                            SKUs
+                        </p>
+                        <p class="slds-text-heading_small slds-text-title_bold">{totalSkus}</p>
                     </div>
                 </div>
                 <div class="slds-col slds-size_1-of-3">
-                    <div class="slds-box slds-box_x-small slds-theme_shade">
-                        <p class="slds-text-title_caps slds-text-color_weak">Available Units</p>
-                        <p class="slds-text-heading_medium slds-text-title_bold">{totalAvailableUnits}</p>
+                    <div class="slds-box slds-box_x-small slds-theme_shade slds-text-align_center">
+                        <p class="slds-text-title_caps slds-text-color_weak slds-truncate" title="Available Units">
+                            Available
+                        </p>
+                        <p class="slds-text-heading_small slds-text-title_bold">{totalAvailableUnits}</p>
                     </div>
                 </div>
                 <div class="slds-col slds-size_1-of-3">
-                    <div class="slds-box slds-box_x-small slds-theme_shade">
-                        <p class="slds-text-title_caps slds-text-color_weak">Low / Out Alerts</p>
-                        <p class="slds-text-heading_medium slds-text-title_bold slds-text-color_error">
+                    <div class="slds-box slds-box_x-small slds-theme_shade slds-text-align_center">
+                        <p class="slds-text-title_caps slds-text-color_weak slds-truncate" title="Low / Out Alerts">
+                            Alerts
+                        </p>
+                        <p class="slds-text-heading_small slds-text-title_bold slds-text-color_error">
                             {lowOrOutCount}
                         </p>
                     </div>
                 </div>
             </div>
 
-            <!-- SLDS Search & Filter Grid -->
-            <div class="slds-grid slds-wrap slds-gutters_x-small slds-m-bottom_medium">
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_7-of-12">
+            <!-- SLDS Search & Filter Grid (Stacks cleanly on Mobile) -->
+            <div class="slds-grid slds-wrap slds-gutters_x-small slds-m-bottom_small">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_7-of-12 slds-m-bottom_x-small">
                     <lightning-input
                         type="search"
                         label="Search Catalog"
@@ -54,7 +60,7 @@
                         onchange={handleSearchChange}
                     ></lightning-input>
                 </div>
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-m-bottom_x-small">
                     <lightning-combobox
                         name="stockStatus"
                         label="Filter Stock Status"
@@ -75,9 +81,9 @@
                 </div>
             </template>
 
-            <!-- SLDS Data Table -->
             <template lwc:elseif={hasInventoryItems}>
-                <div class="slds-scrollable_y catalog-max-height">
+                <!-- DESKTOP & TABLET VIEW (>= 768px): High-Density SLDS Data Table -->
+                <div class="slds-show_medium slds-scrollable_y catalog-max-height">
                     <table
                         class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped slds-table_col-bordered"
                         aria-label="B2B Warehouse Inventory Catalog"
@@ -133,6 +139,70 @@
                             </template>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- MOBILE VIEW (< 768px): Touch-Optimized SLDS Product Cards -->
+                <div class="slds-hide_medium">
+                    <template for:each={inventoryItems} for:item="item">
+                        <article
+                            key={item.Id}
+                            class="slds-box slds-box_x-small slds-theme_default slds-m-bottom_small"
+                        >
+                            <!-- Card Header: Product Name + Status Badge -->
+                            <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-start slds-m-bottom_x-small">
+                                <div class="slds-col slds-has-flexi-truncate slds-p-right_x-small">
+                                    <h3 class="slds-text-title_bold slds-truncate" title={item.productName}>
+                                        {item.productName}
+                                    </h3>
+                                    <p class="slds-text-body_small slds-text-color_weak">
+                                        {item.External_SKU__c} &bull; {item.productFamily}
+                                    </p>
+                                </div>
+                                <div class="slds-col slds-no-flex">
+                                    <span class={item.sldsBadgeClass}>{item.Stock_Status__c}</span>
+                                </div>
+                            </div>
+
+                            <!-- Card Metrics Strip: Unit Price | On Hand / Reserved | Available -->
+                            <div class="slds-box slds-box_xx-small slds-theme_shade slds-m-bottom_x-small">
+                                <div class="slds-grid slds-text-align_center">
+                                    <div class="slds-col slds-size_1-of-3">
+                                        <div class="slds-text-body_small slds-text-color_weak">Unit Price</div>
+                                        <div class="slds-text-title_bold">
+                                            <lightning-formatted-number
+                                                value={item.Unit_Price__c}
+                                                format-style="currency"
+                                                currency-code="USD"
+                                            ></lightning-formatted-number>
+                                        </div>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-3 slds-border_left slds-border_right">
+                                        <div class="slds-text-body_small slds-text-color_weak">On Hand / Res</div>
+                                        <div class="slds-text-body_regular">
+                                            {item.On_Hand_Quantity__c} / {item.Reserved_Quantity__c}
+                                        </div>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-3">
+                                        <div class="slds-text-body_small slds-text-color_weak">Available</div>
+                                        <div class="slds-text-title_bold">{item.Available_Quantity__c}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Touch-Friendly Action Row -->
+                            <div class="slds-grid slds-grid_align-end">
+                                <lightning-button
+                                    label="Add to Order"
+                                    icon-name="utility:add"
+                                    variant="brand"
+                                    stretch
+                                    data-id={item.Id}
+                                    onclick={handleAddToOrder}
+                                    disabled={item.isOutOfStock}
+                                ></lightning-button>
+                            </div>
+                        </article>
+                    </template>
                 </div>
             </template>
 

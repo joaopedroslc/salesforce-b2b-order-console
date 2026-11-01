@@ -3,11 +3,19 @@
     <apiVersion>68.0</apiVersion>
     <isExposed>true</isExposed>
     <masterLabel>B2B Order Console Workspace (All-in-One)</masterLabel>
-    <description>Single-drop responsive SLDS workspace combining the B2B Inventory Catalog, Order Builder, and Order Fulfillment Tracker for Experience Cloud and App Pages.</description>
+    <description>Single-drop responsive SLDS workspace combining the B2B Inventory Catalog, Order Builder, and Order Fulfillment Tracker for Desktop and Mobile on Experience Cloud and App Pages.</description>
     <targets>
         <target>lightning__AppPage</target>
         <target>lightning__HomePage</target>
         <target>lightningCommunity__Page</target>
         <target>lightningCommunity__Default</target>
     </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__AppPage,lightning__HomePage">
+            <supportedFormFactors>
+                <supportedFormFactor type="Large" />
+                <supportedFormFactor type="Small" />
+            </supportedFormFactors>
+        </targetConfig>
+    </targetConfigs>
 </LightningComponentBundle>

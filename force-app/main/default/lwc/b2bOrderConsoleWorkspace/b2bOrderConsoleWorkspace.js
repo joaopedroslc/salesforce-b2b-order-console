@@ -1,8 +1,122 @@
-import { LightningElement } from 'lwc';
+import { LightningElement, wire } from 'lwc';
+import { subscribe, unsubscribe, APPLICATION_SCOPE, MessageContext } from 'lightning/messageService';
+import B2B_ORDER_CHANNEL from '@salesforce/messageChannel/B2B_Order_Channel__c';
 
 /**
- * @description Unified single-drop workspace container for Experience Cloud and Lightning App Pages.
- *              Composes the B2B Inventory Catalog, Order Builder, and Real-Time Order Tracker
- *              in a responsive SLDS 12-column grid with an enterprise portfolio page header.
+ * @description Unified single-drop workspace container for Experience Cloud (LWR/Aura) and Lightning App Pages.
+ *              Provides a side-by-side 2-column SLDS desktop workspace and a touch-friendly mobile tab switcher
+ *              while keeping all child LWCs mounted in the DOM so LMS state is never lost.
  */
-export default class B2bOrderConsoleWorkspace extends LightningElement {}
+export default class B2bOrderConsoleWorkspace extends LightningElement {
+    activeMobileTab = 'all';
+    mobileCartSkus = new Set();
+    lmsSubscription = null;
+
+    @wire(MessageContext)
+    messageContext;
+
+    connectedCallback() {
+        // Default to focused 'catalog' view on narrow mobile screens (< 768px) for optimal UX
+        if (typeof window !== 'undefined' && window.innerWidth < 768) {
+            this.activeMobileTab = 'catalog';
+        }
+        this.subscribeToLms();
+    }
+
+    disconnectedCallback() {
+        if (this.lmsSubscription) {
+            unsubscribe(this.lmsSubscription);
+            this.lmsSubscription = null;
+        }
+    }
+
+    subscribeToLms() {
+        if (!this.lmsSubscription) {
+            this.lmsSubscription = subscribe(
+                this.messageContext,
+                B2B_ORDER_CHANNEL,
+                (message) => this.handleLmsMessage(message),
+                { scope: APPLICATION_SCOPE }
+            );
+        }
+    }
+
+    handleLmsMessage(message) {
+        if (!message) {
+            return;
+        }
+        if (message.actionType === 'ADD_TO_ORDER' && message.payload?.inventoryId) {
+            this.mobileCartSkus = new Set([...this.mobileCartSkus, message.payload.inventoryId]);
+        } else if (message.actionType === 'ORDER_UPDATED') {
+            this.mobileCartSkus = new Set();
+            if (this.activeMobileTab === 'cart') {
+                this.activeMobileTab = 'orders';
+            }
+        }
+    }
+
+    handleMobileTabChange(event) {
+        const selectedTab = event.currentTarget.dataset.tab;
+        if (selectedTab) {
+            this.activeMobileTab = selectedTab;
+        }
+    }
+
+    get mobileCartCount() {
+        return this.mobileCartSkus.size;
+    }
+
+    get cartTabLabel() {
+        return this.mobileCartCount > 0 ? `Cart (${this.mobileCartCount})` : 'Cart';
+    }
+
+    get showMobileCartPrompt() {
+        return this.mobileCartCount > 0 && this.activeMobileTab === 'catalog';
+    }
+
+    get catalogTabVariant() {
+        return this.activeMobileTab === 'catalog' ? 'brand' : 'neutral';
+    }
+
+    get cartTabVariant() {
+        return this.activeMobileTab === 'cart' ? 'brand' : 'neutral';
+    }
+
+    get ordersTabVariant() {
+        return this.activeMobileTab === 'orders' ? 'brand' : 'neutral';
+    }
+
+    get allTabVariant() {
+        return this.activeMobileTab === 'all' ? 'brand' : 'neutral';
+    }
+
+    get catalogColumnClass() {
+        const base = 'slds-col slds-size_1-of-1 slds-large-size_7-of-12 slds-m-bottom_medium';
+        if (this.activeMobileTab === 'catalog' || this.activeMobileTab === 'all') {
+            return base;
+        }
+        return `${base} slds-show_large`;
+    }
+
+    get rightColumnClass() {
+        const base = 'slds-col slds-size_1-of-1 slds-large-size_5-of-12';
+        if (this.activeMobileTab === 'catalog') {
+            return `${base} slds-show_large`;
+        }
+        return base;
+    }
+
+    get builderWrapperClass() {
+        if (this.activeMobileTab === 'orders') {
+            return 'slds-m-bottom_medium slds-show_large';
+        }
+        return 'slds-m-bottom_medium';
+    }
+
+    get trackerWrapperClass() {
+        if (this.activeMobileTab === 'cart') {
+            return 'slds-show_large';
+        }
+        return '';
+    }
+}

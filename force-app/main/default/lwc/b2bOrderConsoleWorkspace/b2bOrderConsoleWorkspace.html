@@ -1,14 +1,14 @@
 <template>
-    <div class="slds-p-around_small">
-        <!-- SLDS Enterprise Portfolio Page Header -->
-        <div class="slds-page-header slds-m-bottom_medium slds-box slds-theme_default">
-            <div class="slds-page-header__row">
-                <div class="slds-page-header__col-title">
+    <div class="slds-p-around_x-small">
+        <!-- SLDS Enterprise Portfolio Page Header (Responsive Mobile + Desktop) -->
+        <div class="slds-page-header slds-m-bottom_small slds-box slds-theme_default">
+            <div class="slds-page-header__row slds-grid slds-wrap">
+                <div class="slds-page-header__col-title slds-size_1-of-1 slds-large-size_7-of-12">
                     <div class="slds-media slds-media_center">
                         <div class="slds-media__figure">
                             <lightning-icon
                                 icon-name="standard:orders"
-                                size="large"
+                                size="medium"
                                 alternative-text="B2B Order Console"
                             ></lightning-icon>
                         </div>
@@ -26,28 +26,28 @@
                                 </div>
                             </div>
                             <p class="slds-page-header__name-meta slds-m-top_xx-small">
-                                Salesforce DX Enterprise Portfolio • Selector / Domain / Service Layers • Named Credential REST Callout • Async Queueable &amp; Platform Events
+                                Salesforce DX Enterprise Architecture • Selector / Domain / Service • Named Credential REST • Platform Events
                             </p>
                         </div>
                     </div>
                 </div>
-                <div class="slds-page-header__col-actions">
-                    <div class="slds-grid slds-wrap slds-gutters_xx-small">
-                        <div class="slds-col">
+                <div class="slds-page-header__col-actions slds-size_1-of-1 slds-large-size_5-of-12 slds-m-top_x-small">
+                    <div class="slds-grid slds-wrap slds-gutters_xx-small slds-grid_align-end">
+                        <div class="slds-col slds-m-bottom_xx-small">
                             <lightning-badge
                                 label="Apex Enterprise Patterns"
                                 icon-name="utility:apex"
                                 class="slds-badge_lightest"
                             ></lightning-badge>
                         </div>
-                        <div class="slds-col">
+                        <div class="slds-col slds-m-bottom_xx-small">
                             <lightning-badge
                                 label="Named Credential REST"
                                 icon-name="utility:connected_apps"
                                 class="slds-badge_lightest"
                             ></lightning-badge>
                         </div>
-                        <div class="slds-col">
+                        <div class="slds-col slds-m-bottom_xx-small">
                             <lightning-badge
                                 label="Platform Events + LMS"
                                 icon-name="utility:broadcast"
@@ -59,19 +59,79 @@
             </div>
         </div>
 
-        <!-- Main Responsive 2-Column SLDS Workspace Grid -->
-        <div class="slds-grid slds-wrap slds-gutters">
+        <!-- MOBILE & TABLET NAVIGATION SWITCHER (< 1024px) -->
+        <div class="slds-hide_large slds-m-bottom_small">
+            <div class="slds-box slds-box_x-small slds-theme_shade">
+                <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-wrap">
+                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_xx-small">
+                        <span class="slds-text-title_caps slds-text-color_weak">
+                            Mobile Workspace View
+                        </span>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1">
+                        <lightning-button-group>
+                            <lightning-button
+                                label="Catalog"
+                                icon-name="utility:product"
+                                variant={catalogTabVariant}
+                                data-tab="catalog"
+                                onclick={handleMobileTabChange}
+                            ></lightning-button>
+                            <lightning-button
+                                label={cartTabLabel}
+                                icon-name="utility:cart"
+                                variant={cartTabVariant}
+                                data-tab="cart"
+                                onclick={handleMobileTabChange}
+                            ></lightning-button>
+                            <lightning-button
+                                label="Orders"
+                                icon-name="utility:fulfillment_order"
+                                variant={ordersTabVariant}
+                                data-tab="orders"
+                                onclick={handleMobileTabChange}
+                            ></lightning-button>
+                            <lightning-button
+                                label="All"
+                                icon-name="utility:layout"
+                                variant={allTabVariant}
+                                data-tab="all"
+                                onclick={handleMobileTabChange}
+                            ></lightning-button>
+                        </lightning-button-group>
+                    </div>
+                </div>
+
+                <!-- Mobile Quick-Jump Banner when item is added to cart while on Catalog tab -->
+                <template lwc:if={showMobileCartPrompt}>
+                    <div class="slds-box slds-box_xx-small slds-theme_info slds-m-top_x-small slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                        <span class="slds-text-body_small">
+                            <strong>{mobileCartCount} SKU(s)</strong> ready in Order Builder
+                        </span>
+                        <lightning-button
+                            label="Open Order Cart"
+                            variant="neutral"
+                            data-tab="cart"
+                            onclick={handleMobileTabChange}
+                        ></lightning-button>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Main Responsive 2-Column SLDS Workspace Grid (Always Mounted to Preserve LMS State) -->
+        <div class="slds-grid slds-wrap slds-gutters_small">
             <!-- Left Column: Warehouse Inventory Catalog -->
-            <div class="slds-col slds-size_1-of-1 slds-large-size_7-of-12 slds-m-bottom_medium">
+            <div class={catalogColumnClass}>
                 <c-b2b-inventory-catalog></c-b2b-inventory-catalog>
             </div>
 
             <!-- Right Column: Interactive Order Builder + Real-Time Fulfillment Monitor -->
-            <div class="slds-col slds-size_1-of-1 slds-large-size_5-of-12">
-                <div class="slds-m-bottom_medium">
+            <div class={rightColumnClass}>
+                <div class={builderWrapperClass}>
                     <c-b2b-order-builder></c-b2b-order-builder>
                 </div>
-                <div>
+                <div class={trackerWrapperClass}>
                     <c-b2b-order-tracker></c-b2b-order-tracker>
                 </div>
             </div>
