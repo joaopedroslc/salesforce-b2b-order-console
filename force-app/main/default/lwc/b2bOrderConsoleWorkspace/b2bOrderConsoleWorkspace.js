@@ -4,8 +4,7 @@ import B2B_ORDER_CHANNEL from '@salesforce/messageChannel/B2B_Order_Channel__c';
 
 /**
  * @description Unified single-drop workspace container for Experience Cloud (LWR/Aura) and Lightning App Pages.
- *              Provides a side-by-side 2-column SLDS desktop workspace and a compact mobile switcher
- *              (showing text only on the active tab and icon-only buttons on inactive tabs)
+ *              Provides a side-by-side 2-column SLDS desktop workspace and a smooth-transitioning mobile switcher
  *              while keeping all child LWCs mounted in the DOM so LMS state is never lost.
  */
 export default class B2bOrderConsoleWorkspace extends LightningElement {
@@ -71,20 +70,28 @@ export default class B2bOrderConsoleWorkspace extends LightningElement {
         return this.mobileCartCount > 0 && this.activeMobileTab === 'catalog';
     }
 
-    get isCatalogTabActive() {
-        return this.activeMobileTab === 'catalog';
+    get catalogTabClass() {
+        return this.activeMobileTab === 'catalog'
+            ? 'slds-button slds-button_brand mobile-tab-btn mobile-tab-btn_active'
+            : 'slds-button slds-button_neutral mobile-tab-btn';
     }
 
-    get isCartTabActive() {
-        return this.activeMobileTab === 'cart';
+    get cartTabClass() {
+        return this.activeMobileTab === 'cart'
+            ? 'slds-button slds-button_brand mobile-tab-btn mobile-tab-btn_active'
+            : 'slds-button slds-button_neutral mobile-tab-btn';
     }
 
-    get isOrdersTabActive() {
-        return this.activeMobileTab === 'orders';
+    get ordersTabClass() {
+        return this.activeMobileTab === 'orders'
+            ? 'slds-button slds-button_brand mobile-tab-btn mobile-tab-btn_active'
+            : 'slds-button slds-button_neutral mobile-tab-btn';
     }
 
-    get isAllTabActive() {
-        return this.activeMobileTab === 'all';
+    get allTabClass() {
+        return this.activeMobileTab === 'all'
+            ? 'slds-button slds-button_brand mobile-tab-btn mobile-tab-btn_active'
+            : 'slds-button slds-button_neutral mobile-tab-btn';
     }
 
     get catalogColumnClass() {

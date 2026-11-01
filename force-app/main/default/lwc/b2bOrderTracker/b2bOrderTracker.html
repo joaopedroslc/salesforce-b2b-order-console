@@ -1,7 +1,26 @@
 <template>
-    <lightning-card title="B2B Order Fulfillment" icon-name="standard:fulfillment_order">
-        <div slot="actions" class="tracker-header-actions">
-            <div class="desktop-only-view desktop-actions-row">
+    <article class="slds-card slds-card_boundary">
+        <div class="slds-card__header slds-grid card-header-centered">
+            <header class="slds-media slds-media_center card-header-media">
+                <div class="slds-media__figure">
+                    <lightning-icon
+                        icon-name="standard:fulfillment_order"
+                        size="small"
+                        alternative-text="B2B Order Fulfillment"
+                    ></lightning-icon>
+                </div>
+                <div class="slds-media__body card-header-title-body">
+                    <h2 class="slds-card__header-title">
+                        <span class="slds-text-heading_small" title="B2B Order Fulfillment">
+                            B2B Order Fulfillment
+                        </span>
+                    </h2>
+                </div>
+            </header>
+        </div>
+
+        <div class="slds-card__body slds-card__body_inner tracker-body">
+            <div class="tracker-status-toolbar slds-m-bottom_small">
                 <template lwc:if={empConnected}>
                     <lightning-badge
                         label="Platform Event Auto-Sync Active"
@@ -9,35 +28,22 @@
                         class="slds-theme_success"
                     ></lightning-badge>
                 </template>
-                <lightning-button
-                    label="Refresh"
-                    icon-name="utility:refresh"
-                    onclick={handleRefreshOrders}
-                    disabled={isProcessing}
-                ></lightning-button>
-            </div>
-            <div class="mobile-only-view">
-                <lightning-button-icon
-                    icon-name="utility:refresh"
-                    variant="border-filled"
-                    alternative-text="Refresh Orders"
+                <button
+                    type="button"
+                    class="slds-button slds-button_neutral tracker-refresh-btn"
                     title="Refresh Orders"
+                    aria-label="Refresh Orders"
                     onclick={handleRefreshOrders}
                     disabled={isProcessing}
-                ></lightning-button-icon>
+                >
+                    <lightning-icon
+                        icon-name="utility:refresh"
+                        size="xx-small"
+                        class="refresh-btn-icon"
+                    ></lightning-icon>
+                    <span>Refresh</span>
+                </button>
             </div>
-        </div>
-
-        <div class="slds-card__body slds-card__body_inner tracker-body">
-            <template lwc:if={empConnected}>
-                <div class="mobile-only-view slds-m-bottom_small">
-                    <lightning-badge
-                        label="Platform Event Auto-Sync Active"
-                        icon-name="utility:broadcast"
-                        class="slds-theme_success"
-                    ></lightning-badge>
-                </div>
-            </template>
 
             <template lwc:if={hasOrders}>
                 <div class="desktop-only-view slds-scrollable_x">
@@ -286,5 +292,5 @@
                 </div>
             </template>
         </div>
-    </lightning-card>
+    </article>
 </template>

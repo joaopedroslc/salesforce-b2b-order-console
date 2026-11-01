@@ -1,26 +1,22 @@
 <template>
-    <lightning-card title="B2B Order Builder" icon-name="standard:orders">
-        <div slot="actions">
-            <template lwc:if={hasCartItems}>
-                <div class="desktop-clear-btn">
-                    <lightning-button
-                        label="Clear Cart"
-                        icon-name="utility:clear"
-                        onclick={handleClearCart}
-                        disabled={isSubmitting}
-                    ></lightning-button>
+    <article class="slds-card slds-card_boundary">
+        <div class="slds-card__header slds-grid card-header-centered">
+            <header class="slds-media slds-media_center card-header-media">
+                <div class="slds-media__figure">
+                    <lightning-icon
+                        icon-name="standard:orders"
+                        size="small"
+                        alternative-text="B2B Order Builder"
+                    ></lightning-icon>
                 </div>
-                <div class="mobile-clear-btn">
-                    <lightning-button-icon
-                        icon-name="utility:clear"
-                        variant="border-filled"
-                        alternative-text="Clear Cart"
-                        title="Clear Cart"
-                        onclick={handleClearCart}
-                        disabled={isSubmitting}
-                    ></lightning-button-icon>
+                <div class="slds-media__body card-header-title-body">
+                    <h2 class="slds-card__header-title">
+                        <span class="slds-text-heading_small" title="B2B Order Builder">
+                            B2B Order Builder
+                        </span>
+                    </h2>
                 </div>
-            </template>
+            </header>
         </div>
 
         <div class="slds-card__body slds-card__body_inner">
@@ -37,6 +33,25 @@
             </div>
 
             <template lwc:if={hasCartItems}>
+                <div class="cart-header-row slds-m-bottom_x-small">
+                    <span class="slds-text-title_caps slds-text-color_weak">
+                        Order Line Items ({totalLineCount})
+                    </span>
+                    <button
+                        type="button"
+                        class="slds-button slds-button_neutral clear-cart-compact-btn"
+                        onclick={handleClearCart}
+                        disabled={isSubmitting}
+                    >
+                        <lightning-icon
+                            icon-name="utility:clear"
+                            size="xx-small"
+                            class="clear-cart-icon"
+                        ></lightning-icon>
+                        <span>Clear Cart</span>
+                    </button>
+                </div>
+
                 <div class="slds-scrollable_y cart-max-height slds-m-bottom_medium">
                     <template for:each={cartItems} for:item="line">
                         <c-b2b-order-line-item
@@ -105,5 +120,5 @@
                 </div>
             </template>
         </div>
-    </lightning-card>
+    </article>
 </template>

@@ -1,40 +1,52 @@
 <template>
-    <lightning-card title="B2B Inventory Catalog" icon-name="standard:product">
-        <div slot="actions" class="desktop-only-view">
-            <lightning-button-group>
-                <lightning-button
-                    label="Seed Demo Data"
-                    icon-name="utility:database"
-                    onclick={handleSeedCatalog}
-                    disabled={isSyncing}
-                ></lightning-button>
-                <lightning-button
-                    variant="brand"
-                    label="Sync with ERP"
-                    icon-name="utility:sync"
-                    onclick={handleSyncErp}
-                    disabled={isSyncing}
-                ></lightning-button>
-            </lightning-button-group>
+    <article class="slds-card slds-card_boundary">
+        <div class="slds-card__header slds-grid card-header-centered">
+            <header class="slds-media slds-media_center card-header-media">
+                <div class="slds-media__figure">
+                    <lightning-icon
+                        icon-name="standard:product"
+                        size="small"
+                        alternative-text="B2B Inventory Catalog"
+                    ></lightning-icon>
+                </div>
+                <div class="slds-media__body card-header-title-body">
+                    <h2 class="slds-card__header-title">
+                        <span class="slds-text-heading_small" title="B2B Inventory Catalog">
+                            B2B Inventory Catalog
+                        </span>
+                    </h2>
+                </div>
+            </header>
         </div>
 
         <div class="slds-card__body slds-card__body_inner catalog-body">
-            <div class="mobile-only-view mobile-action-toolbar slds-m-bottom_small">
-                <lightning-button
-                    label="Seed Data"
-                    icon-name="utility:database"
-                    stretch
+            <div class="action-toolbar slds-m-bottom_small">
+                <button
+                    type="button"
+                    class="slds-button slds-button_neutral toolbar-compact-btn"
                     onclick={handleSeedCatalog}
                     disabled={isSyncing}
-                ></lightning-button>
-                <lightning-button
-                    variant="brand"
-                    label="ERP Sync"
-                    icon-name="utility:sync"
-                    stretch
+                >
+                    <lightning-icon
+                        icon-name="utility:database"
+                        size="xx-small"
+                        class="toolbar-btn-icon"
+                    ></lightning-icon>
+                    <span>Seed Data</span>
+                </button>
+                <button
+                    type="button"
+                    class="slds-button slds-button_brand toolbar-compact-btn toolbar-compact-btn_brand"
                     onclick={handleSyncErp}
                     disabled={isSyncing}
-                ></lightning-button>
+                >
+                    <lightning-icon
+                        icon-name="utility:sync"
+                        size="xx-small"
+                        class="toolbar-btn-icon"
+                    ></lightning-icon>
+                    <span>ERP Sync</span>
+                </button>
             </div>
 
             <div class="kpi-grid slds-m-bottom_small">
@@ -244,7 +256,7 @@
                     </div>
                     <h3 class="slds-text-heading_small slds-m-bottom_xx-small">No Catalog Inventory Found</h3>
                     <p class="slds-text-body_regular slds-text-color_weak slds-m-bottom_medium">
-                        Click &ldquo;Seed Demo Data&rdquo; to populate sample B2B Accounts, Products, and Warehouse Stock.
+                        Click &ldquo;Seed Data&rdquo; to populate sample B2B Accounts, Products, and Warehouse Stock.
                     </p>
                     <lightning-button
                         variant="brand"
@@ -256,5 +268,5 @@
                 </div>
             </template>
         </div>
-    </lightning-card>
+    </article>
 </template>
