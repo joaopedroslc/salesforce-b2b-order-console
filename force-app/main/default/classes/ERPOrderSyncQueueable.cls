@@ -4,7 +4,7 @@
  *              enforcing Salesforce callout governor limits (chaining remaining orders when > 90),
  *              and publishes Order_Status_Event__e Platform Events for downstream subscribers and LWC empApi.
  */
-public inherited sharing class ERPOrderSyncQueueable implements Queueable, Database.AllowsCallouts {
+public without sharing class ERPOrderSyncQueueable implements Queueable, Database.AllowsCallouts {
     private static final Integer MAX_CALLOUTS_PER_TRANSACTION = 90;
     private final Set<Id> orderIds;
 

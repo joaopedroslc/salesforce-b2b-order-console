@@ -198,11 +198,15 @@ public inherited sharing class B2BOrdersDomain {
         }
 
         if (!inventoriesToUpdate.isEmpty()) {
-            SObjectAccessDecision decision = Security.stripInaccessible(
-                AccessType.UPDATABLE,
-                inventoriesToUpdate.values()
-            );
-            Database.update(decision.getRecords(), AccessLevel.USER_MODE);
+            if (B2BOrderConsoleController.isGuestContext()) {
+                Database.update(inventoriesToUpdate.values(), AccessLevel.SYSTEM_MODE);
+            } else {
+                SObjectAccessDecision decision = Security.stripInaccessible(
+                    AccessType.UPDATABLE,
+                    inventoriesToUpdate.values()
+                );
+                Database.update(decision.getRecords(), AccessLevel.USER_MODE);
+            }
         }
 
         return newlySubmittedOrderIds;

@@ -432,4 +432,41 @@ private class B2BOrderConsoleTest {
             baseHandler.run();
         }
     }
+
+    @IsTest
+    static void testExperienceCloudGuestPortfolioRunner() {
+        B2BOrderConsoleController.forceGuestMode = true;
+        try {
+            Test.setMock(HttpCalloutMock.class, ERPInventoryHttpCalloutMock.buildSuccessOrderMock('ERP-GUEST-01'));
+            String seedMsg = B2BOrderConsoleController.seedSampleCatalog();
+            System.assertNotEquals(null, seedMsg, 'Guest mode demo seed should succeed.');
+
+            List<Account> accounts = B2BOrderConsoleController.getCustomerAccounts();
+            System.assert(!accounts.isEmpty(), 'Guest mode should retrieve customer accounts.');
+
+            List<Product_Inventory__c> catalog = B2BOrderConsoleController.getCatalogInventory(null, null);
+            System.assert(!catalog.isEmpty(), 'Guest mode should retrieve catalog inventory.');
+
+            B2BOrderService.OrderLineInput line = new B2BOrderService.OrderLineInput();
+            line.productId = catalog[0].Product__c;
+            line.inventoryId = catalog[0].Id;
+            line.quantity = 2;
+            line.unitPrice = catalog[0].Unit_Price__c;
+
+            Test.startTest();
+            B2B_Order__c guestOrder = B2BOrderConsoleController.saveOrder(
+                accounts[0].Id,
+                'Experience Cloud Guest Portfolio Order',
+                new List<B2BOrderService.OrderLineInput>{ line },
+                true
+            );
+            B2BOrderConsoleController.changeOrderStatus(guestOrder.Id, B2BOrdersDomain.STATUS_SHIPPED);
+            List<B2B_Order__c> recent = B2BOrderConsoleController.getRecentOrders(accounts[0].Id);
+            Test.stopTest();
+
+            System.assert(!recent.isEmpty(), 'Guest mode should retrieve recent orders.');
+        } finally {
+            B2BOrderConsoleController.forceGuestMode = false;
+        }
+    }
 }

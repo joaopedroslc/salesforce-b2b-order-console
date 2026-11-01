@@ -74,6 +74,9 @@ public inherited sharing class B2BOrderService implements Callable {
 
         Savepoint sp = Database.setSavepoint();
         try {
+            Boolean isGuest = B2BOrderConsoleController.isGuestContext();
+            System.AccessLevel accessMode = B2BOrderConsoleController.getExecutionAccessLevel();
+
             B2B_Order__c newOrder = new B2B_Order__c(
                 Account__c = accountId,
                 Status__c = B2BOrdersDomain.STATUS_DRAFT,
@@ -81,12 +84,17 @@ public inherited sharing class B2BOrderService implements Callable {
                 Notes__c = notes
             );
 
-            SObjectAccessDecision orderDecision = Security.stripInaccessible(
-                AccessType.CREATABLE,
-                new List<B2B_Order__c>{ newOrder }
-            );
-            List<B2B_Order__c> insertedOrders = (List<B2B_Order__c>) orderDecision.getRecords();
-            Database.insert(insertedOrders, AccessLevel.USER_MODE);
+            List<B2B_Order__c> insertedOrders;
+            if (isGuest) {
+                insertedOrders = new List<B2B_Order__c>{ newOrder };
+            } else {
+                SObjectAccessDecision orderDecision = Security.stripInaccessible(
+                    AccessType.CREATABLE,
+                    new List<B2B_Order__c>{ newOrder }
+                );
+                insertedOrders = (List<B2B_Order__c>) orderDecision.getRecords();
+            }
+            Database.insert(insertedOrders, accessMode);
             Id orderId = insertedOrders[0].Id;
 
             List<B2B_Order_Item__c> itemsToInsert = new List<B2B_Order_Item__c>();
@@ -108,18 +116,22 @@ public inherited sharing class B2BOrderService implements Callable {
                 );
             }
 
-            SObjectAccessDecision itemDecision = Security.stripInaccessible(
-                AccessType.CREATABLE,
-                itemsToInsert
-            );
-            Database.insert(itemDecision.getRecords(), AccessLevel.USER_MODE);
+            if (isGuest) {
+                Database.insert(itemsToInsert, accessMode);
+            } else {
+                SObjectAccessDecision itemDecision = Security.stripInaccessible(
+                    AccessType.CREATABLE,
+                    itemsToInsert
+                );
+                Database.insert(itemDecision.getRecords(), accessMode);
+            }
 
             if (submitImmediately != null && submitImmediately) {
                 B2B_Order__c orderToSubmit = new B2B_Order__c(
                     Id = orderId,
                     Status__c = B2BOrdersDomain.STATUS_SUBMITTED
                 );
-                Database.update(orderToSubmit, AccessLevel.USER_MODE);
+                Database.update(orderToSubmit, accessMode);
             }
 
             List<B2B_Order__c> resultOrders = B2BOrdersSelector.selectByIdsWithItems(new Set<Id>{ orderId });
@@ -142,11 +154,15 @@ public inherited sharing class B2BOrderService implements Callable {
         }
 
         B2B_Order__c orderUpdate = new B2B_Order__c(Id = orderId, Status__c = targetStatus.trim());
-        SObjectAccessDecision decision = Security.stripInaccessible(
-            AccessType.UPDATABLE,
-            new List<B2B_Order__c>{ orderUpdate }
-        );
-        Database.update(decision.getRecords(), AccessLevel.USER_MODE);
+        if (B2BOrderConsoleController.isGuestContext()) {
+            Database.update(orderUpdate, AccessLevel.SYSTEM_MODE);
+        } else {
+            SObjectAccessDecision decision = Security.stripInaccessible(
+                AccessType.UPDATABLE,
+                new List<B2B_Order__c>{ orderUpdate }
+            );
+            Database.update(decision.getRecords(), AccessLevel.USER_MODE);
+        }
 
         List<B2B_Order__c> updated = B2BOrdersSelector.selectByIdsWithItems(new Set<Id>{ orderId });
         return updated.isEmpty() ? null : updated[0];
@@ -233,11 +249,15 @@ public inherited sharing class B2BOrderService implements Callable {
         }
 
         if (!recordsToUpdate.isEmpty()) {
-            SObjectAccessDecision decision = Security.stripInaccessible(
-                AccessType.UPDATABLE,
-                recordsToUpdate
-            );
-            Database.update(decision.getRecords(), AccessLevel.USER_MODE);
+            if (B2BOrderConsoleController.isGuestContext()) {
+                Database.update(recordsToUpdate, AccessLevel.SYSTEM_MODE);
+            } else {
+                SObjectAccessDecision decision = Security.stripInaccessible(
+                    AccessType.UPDATABLE,
+                    recordsToUpdate
+                );
+                Database.update(decision.getRecords(), AccessLevel.USER_MODE);
+            }
         }
 
         Set<Id> refreshedIds = new Map<Id, Product_Inventory__c>(inventories).keySet();
@@ -250,13 +270,17 @@ public inherited sharing class B2BOrderService implements Callable {
      * @return Summary message of seeded records.
      */
     public static String seedDemoData() {
-        List<Account> existingAccounts = [
-            SELECT Id, Name
-            FROM Account
-            WHERE Name IN ('Acme Industrial Corp', 'Globex Logistics Ltd', 'Stark Manufacturing B2B')
-            WITH USER_MODE
-            LIMIT 10
-        ];
+        System.AccessLevel accessMode = B2BOrderConsoleController.getExecutionAccessLevel();
+        Set<String> demoNames = new Set<String>{
+            'Acme Industrial Corp',
+            'Globex Logistics Ltd',
+            'Stark Manufacturing B2B'
+        };
+        List<Account> existingAccounts = (List<Account>) Database.queryWithBinds(
+            'SELECT Id, Name FROM Account WHERE Name IN :demoNames LIMIT 10',
+            new Map<String, Object>{ 'demoNames' => demoNames },
+            accessMode
+        );
 
         if (existingAccounts.isEmpty()) {
             List<Account> demoAccounts = new List<Account>{
@@ -264,7 +288,7 @@ public inherited sharing class B2BOrderService implements Callable {
                 new Account(Name = 'Globex Logistics Ltd', Type = 'Customer - Channel', Industry = 'Transportation'),
                 new Account(Name = 'Stark Manufacturing B2B', Type = 'Customer - Direct', Industry = 'Electronics')
             };
-            Database.insert(demoAccounts, AccessLevel.USER_MODE);
+            Database.insert(demoAccounts, accessMode);
         }
 
         Map<String, Map<String, Object>> catalogBlueprints = new Map<String, Map<String, Object>>{
@@ -351,7 +375,7 @@ public inherited sharing class B2BOrderService implements Callable {
         }
 
         if (!productsToInsert.isEmpty()) {
-            Database.insert(productsToInsert, AccessLevel.USER_MODE);
+            Database.insert(productsToInsert, accessMode);
 
             List<Product_Inventory__c> newInventories = new List<Product_Inventory__c>();
             for (Integer i = 0; i < skusToCreate.size(); i++) {
@@ -369,7 +393,7 @@ public inherited sharing class B2BOrderService implements Callable {
                     )
                 );
             }
-            Database.insert(newInventories, AccessLevel.USER_MODE);
+            Database.insert(newInventories, accessMode);
         }
 
         return 'Seeded ' +

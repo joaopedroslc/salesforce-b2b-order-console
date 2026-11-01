@@ -178,10 +178,18 @@ sf org assign permset --name B2B_Order_Console_Admin
 sf apex run test --class-names B2BOrderConsoleTest --code-coverage --result-format human --synchronous
 ```
 
-### 5. Launch the Application
+### 5. Launch the Application (Internal Lightning Experience)
 1. Run `sf org open` to open your Salesforce org.
 2. Click the **App Launcher** (9 dots in the top-left corner) and search for **B2B Order Console**.
 3. Click **Seed Demo Data** in the top-right of the **B2B Warehouse Inventory Catalog** card to populate sample B2B Accounts, Products, and Inventory records.
+
+### 6. Publish as a Public Live Portfolio Site (Experience Cloud)
+All components (`b2bOrderConsoleWorkspace`, `b2bInventoryCatalog`, `b2bOrderBuilder`, and `b2bOrderTracker`) are configured with `lightningCommunity__Page` and `lightningCommunity__Default` targets, plus controlled Guest User demo support in `B2BOrderConsoleController`:
+1. In **Setup**, search for **Digital Experiences** → **Settings**, check **Enable Digital Experiences**, and click **Save**.
+2. Go to **Setup** → **Digital Experiences** → **All Sites** → **New**, choose the **Build Your Own (Aura)** or **Customer Account Portal** template, name it `B2B Order Console Portfolio`, and click **Create**.
+3. In **Administration** → **Preferences**, check **Give access to public API requests on Chatter** and click **Save**.
+4. Open **Builder**, click the **Settings (Gear icon)** → **General**, check **Public Access ("Guest users can see and interact with the site without logging in")**, and click the **Guest User Profile** link → **Enabled Apex Class Access** → **Edit** → add `B2BOrderConsoleController` → **Save**.
+5. In **Builder** → **Components** (lightning bolt icon), drag **B2B Order Console Workspace (All-in-One)** (`c-b2b-order-console-workspace`) onto the Home page content region and click **Publish**.
 
 ---
 

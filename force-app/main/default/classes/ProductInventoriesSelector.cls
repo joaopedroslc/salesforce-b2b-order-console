@@ -1,8 +1,15 @@
 /**
  * @description Selector Layer for Product_Inventory__c and related Product2 data.
- *              Centralizes all SOQL queries with strict WITH USER_MODE security enforcement.
+ *              Centralizes all SOQL queries with strict AccessLevel.USER_MODE enforcement
+ *              (and Experience Cloud Guest demo support via B2BOrderConsoleController.getExecutionAccessLevel()).
  */
 public inherited sharing class ProductInventoriesSelector {
+    private static final String BASE_FIELDS =
+        'Id, Name, Product__c, Product__r.Name, Product__r.ProductCode, ' +
+        'Product__r.Family, Product__r.Description, Product__r.IsActive, ' +
+        'External_SKU__c, Unit_Price__c, On_Hand_Quantity__c, Reserved_Quantity__c, ' +
+        'Available_Quantity__c, Reorder_Threshold__c, Stock_Status__c, Last_ERP_Sync__c';
+
     /**
      * @description Selects Product_Inventory__c records by their Salesforce IDs.
      * @param inventoryIds Set of Product_Inventory__c IDs.
@@ -12,29 +19,15 @@ public inherited sharing class ProductInventoriesSelector {
         if (inventoryIds == null || inventoryIds.isEmpty()) {
             return new List<Product_Inventory__c>();
         }
-        return [
-            SELECT
-                Id,
-                Name,
-                Product__c,
-                Product__r.Name,
-                Product__r.ProductCode,
-                Product__r.Family,
-                Product__r.Description,
-                Product__r.IsActive,
-                External_SKU__c,
-                Unit_Price__c,
-                On_Hand_Quantity__c,
-                Reserved_Quantity__c,
-                Available_Quantity__c,
-                Reorder_Threshold__c,
-                Stock_Status__c,
-                Last_ERP_Sync__c
-            FROM Product_Inventory__c
-            WHERE Id IN :inventoryIds
-            WITH USER_MODE
-            ORDER BY Product__r.Name ASC
-        ];
+        String soql =
+            'SELECT ' +
+            BASE_FIELDS +
+            ' FROM Product_Inventory__c WHERE Id IN :inventoryIds ORDER BY Product__r.Name ASC';
+        return (List<Product_Inventory__c>) Database.queryWithBinds(
+            soql,
+            new Map<String, Object>{ 'inventoryIds' => inventoryIds },
+            B2BOrderConsoleController.getExecutionAccessLevel()
+        );
     }
 
     /**
@@ -46,27 +39,15 @@ public inherited sharing class ProductInventoriesSelector {
         if (productIds == null || productIds.isEmpty()) {
             return new List<Product_Inventory__c>();
         }
-        return [
-            SELECT
-                Id,
-                Name,
-                Product__c,
-                Product__r.Name,
-                Product__r.ProductCode,
-                Product__r.Family,
-                External_SKU__c,
-                Unit_Price__c,
-                On_Hand_Quantity__c,
-                Reserved_Quantity__c,
-                Available_Quantity__c,
-                Reorder_Threshold__c,
-                Stock_Status__c,
-                Last_ERP_Sync__c
-            FROM Product_Inventory__c
-            WHERE Product__c IN :productIds
-            WITH USER_MODE
-            ORDER BY Product__r.Name ASC
-        ];
+        String soql =
+            'SELECT ' +
+            BASE_FIELDS +
+            ' FROM Product_Inventory__c WHERE Product__c IN :productIds ORDER BY Product__r.Name ASC';
+        return (List<Product_Inventory__c>) Database.queryWithBinds(
+            soql,
+            new Map<String, Object>{ 'productIds' => productIds },
+            B2BOrderConsoleController.getExecutionAccessLevel()
+        );
     }
 
     /**
@@ -78,26 +59,15 @@ public inherited sharing class ProductInventoriesSelector {
         if (externalSkus == null || externalSkus.isEmpty()) {
             return new List<Product_Inventory__c>();
         }
-        return [
-            SELECT
-                Id,
-                Name,
-                Product__c,
-                Product__r.Name,
-                Product__r.ProductCode,
-                External_SKU__c,
-                Unit_Price__c,
-                On_Hand_Quantity__c,
-                Reserved_Quantity__c,
-                Available_Quantity__c,
-                Reorder_Threshold__c,
-                Stock_Status__c,
-                Last_ERP_Sync__c
-            FROM Product_Inventory__c
-            WHERE External_SKU__c IN :externalSkus
-            WITH USER_MODE
-            ORDER BY External_SKU__c ASC
-        ];
+        String soql =
+            'SELECT ' +
+            BASE_FIELDS +
+            ' FROM Product_Inventory__c WHERE External_SKU__c IN :externalSkus ORDER BY External_SKU__c ASC';
+        return (List<Product_Inventory__c>) Database.queryWithBinds(
+            soql,
+            new Map<String, Object>{ 'externalSkus' => externalSkus },
+            B2BOrderConsoleController.getExecutionAccessLevel()
+        );
     }
 
     /**
@@ -112,109 +82,31 @@ public inherited sharing class ProductInventoriesSelector {
             ? String.escapeSingleQuotes(stockStatus.trim())
             : null;
 
-        if (cleanSearch != null && cleanStatus != null) {
-            return [
-                SELECT
-                    Id,
-                    Name,
-                    Product__c,
-                    Product__r.Name,
-                    Product__r.ProductCode,
-                    Product__r.Family,
-                    Product__r.Description,
-                    External_SKU__c,
-                    Unit_Price__c,
-                    On_Hand_Quantity__c,
-                    Reserved_Quantity__c,
-                    Available_Quantity__c,
-                    Reorder_Threshold__c,
-                    Stock_Status__c,
-                    Last_ERP_Sync__c
-                FROM Product_Inventory__c
-                WHERE
-                    (Product__r.Name LIKE :cleanSearch
-                    OR Product__r.ProductCode LIKE :cleanSearch
-                    OR External_SKU__c LIKE :cleanSearch)
-                    AND Stock_Status__c = :cleanStatus
-                WITH USER_MODE
-                ORDER BY Product__r.Name ASC
-                LIMIT 200
-            ];
-        } else if (cleanSearch != null) {
-            return [
-                SELECT
-                    Id,
-                    Name,
-                    Product__c,
-                    Product__r.Name,
-                    Product__r.ProductCode,
-                    Product__r.Family,
-                    Product__r.Description,
-                    External_SKU__c,
-                    Unit_Price__c,
-                    On_Hand_Quantity__c,
-                    Reserved_Quantity__c,
-                    Available_Quantity__c,
-                    Reorder_Threshold__c,
-                    Stock_Status__c,
-                    Last_ERP_Sync__c
-                FROM Product_Inventory__c
-                WHERE
-                    Product__r.Name LIKE :cleanSearch
-                    OR Product__r.ProductCode LIKE :cleanSearch
-                    OR External_SKU__c LIKE :cleanSearch
-                WITH USER_MODE
-                ORDER BY Product__r.Name ASC
-                LIMIT 200
-            ];
-        } else if (cleanStatus != null) {
-            return [
-                SELECT
-                    Id,
-                    Name,
-                    Product__c,
-                    Product__r.Name,
-                    Product__r.ProductCode,
-                    Product__r.Family,
-                    Product__r.Description,
-                    External_SKU__c,
-                    Unit_Price__c,
-                    On_Hand_Quantity__c,
-                    Reserved_Quantity__c,
-                    Available_Quantity__c,
-                    Reorder_Threshold__c,
-                    Stock_Status__c,
-                    Last_ERP_Sync__c
-                FROM Product_Inventory__c
-                WHERE Stock_Status__c = :cleanStatus
-                WITH USER_MODE
-                ORDER BY Product__r.Name ASC
-                LIMIT 200
-            ];
+        Map<String, Object> binds = new Map<String, Object>();
+        List<String> whereClauses = new List<String>();
+
+        if (cleanSearch != null) {
+            binds.put('cleanSearch', cleanSearch);
+            whereClauses.add(
+                '(Product__r.Name LIKE :cleanSearch OR Product__r.ProductCode LIKE :cleanSearch OR External_SKU__c LIKE :cleanSearch)'
+            );
+        }
+        if (cleanStatus != null) {
+            binds.put('cleanStatus', cleanStatus);
+            whereClauses.add('Stock_Status__c = :cleanStatus');
         }
 
-        return [
-            SELECT
-                Id,
-                Name,
-                Product__c,
-                Product__r.Name,
-                Product__r.ProductCode,
-                Product__r.Family,
-                Product__r.Description,
-                External_SKU__c,
-                Unit_Price__c,
-                On_Hand_Quantity__c,
-                Reserved_Quantity__c,
-                Available_Quantity__c,
-                Reorder_Threshold__c,
-                Stock_Status__c,
-                Last_ERP_Sync__c
-            FROM Product_Inventory__c
-            WITH USER_MODE
-            ORDER BY Product__r.Name ASC
-            LIMIT 200
-        ];
+        String soql = 'SELECT ' + BASE_FIELDS + ' FROM Product_Inventory__c';
+        if (!whereClauses.isEmpty()) {
+            soql += ' WHERE ' + String.join(whereClauses, ' AND ');
+        }
+        soql += ' ORDER BY Product__r.Name ASC LIMIT 200';
+
+        return (List<Product_Inventory__c>) Database.queryWithBinds(
+            soql,
+            binds,
+            B2BOrderConsoleController.getExecutionAccessLevel()
+        );
     }
 }
 

@@ -88,6 +88,18 @@ export default class B2bOrderTracker extends LightningElement {
         }
         if (message.actionType === 'ORDER_UPDATED' || message.actionType === 'CATALOG_REFRESH') {
             this.handleRefreshOrders();
+            // When running on Experience Cloud (where CometD empApi is unavailable for Guest users),
+            // schedule automatic follow-up refreshes so async Queueable + Platform Event updates appear live.
+            if (message.actionType === 'ORDER_UPDATED' && !this.empConnected) {
+                // eslint-disable-next-line @lwc/lwc/no-async-operation
+                window.setTimeout(() => {
+                    this.handleRefreshOrders();
+                }, 2200);
+                // eslint-disable-next-line @lwc/lwc/no-async-operation
+                window.setTimeout(() => {
+                    this.handleRefreshOrders();
+                }, 4500);
+            }
         }
     }
 

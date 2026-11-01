@@ -1,0 +1,80 @@
+<template>
+    <div class="slds-p-around_small">
+        <!-- SLDS Enterprise Portfolio Page Header -->
+        <div class="slds-page-header slds-m-bottom_medium slds-box slds-theme_default">
+            <div class="slds-page-header__row">
+                <div class="slds-page-header__col-title">
+                    <div class="slds-media slds-media_center">
+                        <div class="slds-media__figure">
+                            <lightning-icon
+                                icon-name="standard:orders"
+                                size="large"
+                                alternative-text="B2B Order Console"
+                            ></lightning-icon>
+                        </div>
+                        <div class="slds-media__body">
+                            <div class="slds-page-header__name">
+                                <div class="slds-page-header__name-title">
+                                    <h1>
+                                        <span
+                                            class="slds-page-header__title slds-truncate"
+                                            title="B2B Order &amp; Inventory Console"
+                                        >
+                                            B2B Order &amp; Inventory Console
+                                        </span>
+                                    </h1>
+                                </div>
+                            </div>
+                            <p class="slds-page-header__name-meta slds-m-top_xx-small">
+                                Salesforce DX Enterprise Portfolio • Selector / Domain / Service Layers • Named Credential REST Callout • Async Queueable &amp; Platform Events
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-page-header__col-actions">
+                    <div class="slds-grid slds-wrap slds-gutters_xx-small">
+                        <div class="slds-col">
+                            <lightning-badge
+                                label="Apex Enterprise Patterns"
+                                icon-name="utility:apex"
+                                class="slds-badge_lightest"
+                            ></lightning-badge>
+                        </div>
+                        <div class="slds-col">
+                            <lightning-badge
+                                label="Named Credential REST"
+                                icon-name="utility:connected_apps"
+                                class="slds-badge_lightest"
+                            ></lightning-badge>
+                        </div>
+                        <div class="slds-col">
+                            <lightning-badge
+                                label="Platform Events + LMS"
+                                icon-name="utility:broadcast"
+                                class="slds-badge_lightest"
+                            ></lightning-badge>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Responsive 2-Column SLDS Workspace Grid -->
+        <div class="slds-grid slds-wrap slds-gutters">
+            <!-- Left Column: Warehouse Inventory Catalog -->
+            <div class="slds-col slds-size_1-of-1 slds-large-size_7-of-12 slds-m-bottom_medium">
+                <c-b2b-inventory-catalog></c-b2b-inventory-catalog>
+            </div>
+
+            <!-- Right Column: Interactive Order Builder + Real-Time Fulfillment Monitor -->
+            <div class="slds-col slds-size_1-of-1 slds-large-size_5-of-12">
+                <div class="slds-m-bottom_medium">
+                    <c-b2b-order-builder></c-b2b-order-builder>
+                </div>
+                <div>
+                    <c-b2b-order-tracker></c-b2b-order-tracker>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

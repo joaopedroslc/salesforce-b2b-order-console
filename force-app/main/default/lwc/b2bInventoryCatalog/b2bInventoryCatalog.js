@@ -79,6 +79,12 @@ export default class B2bInventoryCatalog extends LightningElement {
             (message.actionType === 'ORDER_UPDATED' || message.actionType === 'CATALOG_REFRESH')
         ) {
             this.refreshCatalog();
+            if (message.actionType === 'ORDER_UPDATED') {
+                // eslint-disable-next-line @lwc/lwc/no-async-operation
+                window.setTimeout(() => {
+                    this.refreshCatalog();
+                }, 2400);
+            }
         }
     }
 
