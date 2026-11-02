@@ -234,16 +234,49 @@
     }
 
     .workspace-grid {
-        grid-template-columns: minmax(0, 5.5fr) minmax(0, 6.5fr);
-        align-items: start;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        align-items: stretch;
         width: 100%;
+        flex: 1 1 auto;
     }
 
     .workspace-col-left {
         width: 100%;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .workspace-col-left c-b2b-inventory-catalog {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        height: 100%;
     }
 
     .workspace-col-right {
         width: 100%;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .workspace-builder-wrapper {
+        flex: 0 0 auto;
+        margin-bottom: 0.75rem;
+    }
+
+    .workspace-tracker-wrapper {
+        flex: 1 1 auto;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .workspace-tracker-wrapper c-b2b-order-tracker {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        height: 100%;
     }
 }

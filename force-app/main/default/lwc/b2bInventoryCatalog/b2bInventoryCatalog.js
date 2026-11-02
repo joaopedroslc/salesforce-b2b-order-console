@@ -19,7 +19,7 @@ export default class B2bInventoryCatalog extends LightningElement {
     selectedStatus = 'All';
     selectedSort = 'name-asc';
     inventoryItems = [];
-    pageSize = 6;
+    pageSize = 10;
     currentPage = 1;
     isLoading = true;
     isSyncing = false;
@@ -40,13 +40,6 @@ export default class B2bInventoryCatalog extends LightningElement {
         { label: 'Price (Low to High)', value: 'price-asc' },
         { label: 'Price (High to Low)', value: 'price-desc' },
         { label: 'Availability (Highest First)', value: 'avail-desc' }
-    ];
-
-    pageSizeOptions = [
-        { label: '6 / page', value: '6' },
-        { label: '12 / page', value: '12' },
-        { label: '24 / page', value: '24' },
-        { label: '50 / page', value: '50' }
     ];
 
     @wire(MessageContext)
@@ -257,15 +250,6 @@ export default class B2bInventoryCatalog extends LightningElement {
         if (this.currentPage < this.totalPages) {
             this.currentPage += 1;
         }
-    }
-
-    handlePageSizeChange(event) {
-        this.pageSize = parseInt(event.detail.value, 10);
-        this.currentPage = 1;
-    }
-
-    get pageSizeValue() {
-        return String(this.pageSize);
     }
 
     get totalPages() {

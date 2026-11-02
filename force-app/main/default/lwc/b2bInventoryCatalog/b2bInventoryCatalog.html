@@ -196,26 +196,26 @@
             </template>
 
             <template lwc:elseif={hasInventoryItems}>
-                <div class="desktop-only-view slds-scrollable_y catalog-table-container">
+                <div class="desktop-only-view catalog-table-container">
                     <table
-                        class="slds-table slds-table_compact slds-table_cell-buffer slds-table_bordered slds-table_striped slds-table_col-bordered catalog-table"
+                        class="slds-table slds-table_compact slds-table_bordered slds-table_striped slds-table_col-bordered catalog-table"
                         aria-label="B2B Warehouse Inventory Catalog"
                     >
                         <thead>
                             <tr class="slds-line-height_reset">
-                                <th scope="col"><div class="slds-truncate" title="Product &amp; SKU">Product / SKU</div></th>
-                                <th scope="col"><div class="slds-truncate" title="Unit Price">Unit Price</div></th>
-                                <th scope="col"><div class="slds-truncate" title="On Hand">On Hand</div></th>
-                                <th scope="col"><div class="slds-truncate" title="Reserved">Reserved</div></th>
-                                <th scope="col"><div class="slds-truncate" title="Available">Available</div></th>
-                                <th scope="col"><div class="slds-truncate" title="Status">Status</div></th>
-                                <th scope="col"><div class="slds-truncate" title="Action">Action</div></th>
+                                <th scope="col" class="col-product"><div class="slds-truncate" title="Product / SKU">Product / SKU</div></th>
+                                <th scope="col" class="col-price"><div class="slds-truncate" title="Unit Price">Unit Price</div></th>
+                                <th scope="col" class="col-qty"><div class="slds-truncate" title="On Hand">On Hand</div></th>
+                                <th scope="col" class="col-qty"><div class="slds-truncate" title="Reserved">Reserved</div></th>
+                                <th scope="col" class="col-qty"><div class="slds-truncate" title="Available">Available</div></th>
+                                <th scope="col" class="col-status"><div class="slds-truncate" title="Status">Status</div></th>
+                                <th scope="col" class="col-action"><div class="slds-truncate" title="Action">Action</div></th>
                             </tr>
                         </thead>
                         <tbody>
                             <template for:each={paginatedInventoryItems} for:item="item">
                                 <tr key={item.Id} class="slds-hint-parent">
-                                    <th scope="row">
+                                    <th scope="row" class="col-product">
                                         <div class="slds-text-title_bold slds-truncate product-title" title={item.productName}>
                                             {item.productName}
                                         </div>
@@ -223,31 +223,32 @@
                                             {item.External_SKU__c} &bull; {item.productFamily}
                                         </div>
                                     </th>
-                                    <td>
+                                    <td class="col-price">
                                         <lightning-formatted-number
                                             value={item.Unit_Price__c}
                                             format-style="currency"
                                             currency-code="USD"
                                         ></lightning-formatted-number>
                                     </td>
-                                    <td>{item.On_Hand_Quantity__c}</td>
-                                    <td>{item.Reserved_Quantity__c}</td>
-                                    <td>
+                                    <td class="col-qty">{item.On_Hand_Quantity__c}</td>
+                                    <td class="col-qty">{item.Reserved_Quantity__c}</td>
+                                    <td class="col-qty">
                                         <span class="slds-text-title_bold">{item.Available_Quantity__c}</span>
                                     </td>
-                                    <td>
+                                    <td class="col-status">
                                         <span class={item.sldsBadgeClass}>{item.Stock_Status__c}</span>
                                     </td>
-                                    <td>
+                                    <td class="col-action">
                                         <template lwc:if={item.isOutOfStock}>
                                             <button
                                                 type="button"
                                                 class="slds-button slds-button_neutral action-backorder-btn catalog-action-btn"
                                                 disabled
                                                 title="Zero stock available - backorder required"
+                                                aria-label="Backorder required"
                                             >
-                                                <lightning-icon icon-name="utility:clock" size="xx-small" class="slds-m-right_xx-small action-btn-icon"></lightning-icon>
-                                                <span>Backorder</span>
+                                                <lightning-icon icon-name="utility:clock" size="xx-small" class="action-btn-icon"></lightning-icon>
+                                                <span class="action-btn-label">Backorder</span>
                                             </button>
                                         </template>
                                         <template lwc:else>
@@ -256,9 +257,11 @@
                                                 class="slds-button slds-button_neutral catalog-action-btn"
                                                 data-id={item.Id}
                                                 onclick={handleAddToOrder}
+                                                title="Add to Order"
+                                                aria-label="Add to Order"
                                             >
-                                                <lightning-icon icon-name="utility:add" size="xx-small" class="slds-m-right_xx-small action-btn-icon"></lightning-icon>
-                                                <span>Add to Order</span>
+                                                <lightning-icon icon-name="utility:add" size="xx-small" class="action-btn-icon"></lightning-icon>
+                                                <span class="action-btn-label">Add to Order</span>
                                             </button>
                                         </template>
                                     </td>
@@ -365,16 +368,6 @@
                         >
                             <lightning-icon icon-name="utility:chevronright" size="xx-small" alternative-text="Next Page"></lightning-icon>
                         </button>
-                    </div>
-                    <div class="pagination-size-select">
-                        <lightning-combobox
-                            name="pageSize"
-                            label="Page Size"
-                            variant="label-hidden"
-                            value={pageSizeValue}
-                            options={pageSizeOptions}
-                            onchange={handlePageSizeChange}
-                        ></lightning-combobox>
                     </div>
                 </div>
             </template>
