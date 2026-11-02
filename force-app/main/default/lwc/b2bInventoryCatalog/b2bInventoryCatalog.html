@@ -213,7 +213,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <template for:each={sortedInventoryItems} for:item="item">
+                            <template for:each={paginatedInventoryItems} for:item="item">
                                 <tr key={item.Id} class="slds-hint-parent">
                                     <th scope="row">
                                         <div class="slds-text-title_bold slds-truncate" title={item.productName}>
@@ -267,7 +267,7 @@
                 </div>
 
                 <div class="mobile-only-view">
-                    <template for:each={sortedInventoryItems} for:item="item">
+                    <template for:each={paginatedInventoryItems} for:item="item">
                         <article
                             key={item.Id}
                             class="slds-box slds-box_x-small slds-theme_default slds-card_boundary slds-m-bottom_small mobile-product-card"
@@ -335,6 +335,45 @@
                             </div>
                         </article>
                     </template>
+                </div>
+
+                <div class="pagination-bar slds-m-top_small slds-p-horizontal_xx-small">
+                    <div class="pagination-summary slds-text-body_small slds-text-color_weak">
+                        {paginationSummary}
+                    </div>
+                    <div class="pagination-controls">
+                        <button
+                            type="button"
+                            class="slds-button slds-button_icon slds-button_icon-border-filled pagination-nav-btn"
+                            title="Previous Page"
+                            disabled={isFirstPage}
+                            onclick={handlePreviousPage}
+                        >
+                            <lightning-icon icon-name="utility:chevronleft" size="xx-small" alternative-text="Previous Page"></lightning-icon>
+                        </button>
+                        <span class="slds-text-body_small slds-p-horizontal_x-small page-indicator">
+                            Page <strong>{currentPage}</strong> of <strong>{totalPages}</strong>
+                        </span>
+                        <button
+                            type="button"
+                            class="slds-button slds-button_icon slds-button_icon-border-filled pagination-nav-btn"
+                            title="Next Page"
+                            disabled={isLastPage}
+                            onclick={handleNextPage}
+                        >
+                            <lightning-icon icon-name="utility:chevronright" size="xx-small" alternative-text="Next Page"></lightning-icon>
+                        </button>
+                    </div>
+                    <div class="pagination-size-select">
+                        <lightning-combobox
+                            name="pageSize"
+                            label="Page Size"
+                            variant="label-hidden"
+                            value={pageSizeValue}
+                            options={pageSizeOptions}
+                            onchange={handlePageSizeChange}
+                        ></lightning-combobox>
+                    </div>
                 </div>
             </template>
 

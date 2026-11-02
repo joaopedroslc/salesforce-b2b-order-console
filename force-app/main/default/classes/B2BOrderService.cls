@@ -347,6 +347,64 @@ public inherited sharing class B2BOrderService implements Callable {
             }
         };
 
+        List<String> productTypes = new List<String>{
+            'Servo Actuator',
+            'Proximity Sensor',
+            'Solenoid Valve',
+            'Safety Light Curtain',
+            'Conveyor Belt Module',
+            'Digital I/O Terminal',
+            'Pressure Transmitter',
+            'Stepper Controller',
+            'Optical Rotary Encoder',
+            'Pneumatic Cylinder',
+            'Industrial Ethernet Switch',
+            'Power Distribution Unit'
+        };
+
+        List<String> families = new List<String>{
+            'Robotics & Motion',
+            'Safety Sensors',
+            'Hydraulics',
+            'Safety Sensors',
+            'Material Handling',
+            'Control Systems',
+            'Hydraulics',
+            'Robotics & Motion',
+            'Safety Sensors',
+            'Hydraulics',
+            'Control Systems',
+            'Power Electronics'
+        };
+
+        List<Decimal> basePrices = new List<Decimal>{
+            820.00, 185.00, 340.00, 1250.00, 620.00, 480.00, 395.00, 710.00, 290.00, 410.00, 890.00, 1150.00
+        };
+
+        for (Integer i = 7; i <= 210; i++) {
+            Integer modIdx = Math.mod(i, productTypes.size());
+            String sku = 'SKU-IND-' + String.valueOf(1000 + i);
+            String prodName = productTypes[modIdx] + ' Series ' + i;
+            String prodCode = 'IND-GEN-' + i;
+            String fam = families[modIdx];
+            Decimal price = basePrices[modIdx] + (Math.mod(i * 17, 300));
+            Decimal onHand = Math.mod(i * 13, 140) + 10;
+            Decimal threshold = 10;
+
+            catalogBlueprints.put(
+                sku,
+                new Map<String, Object>{
+                    'name' => prodName,
+                    'code' => prodCode,
+                    'family' => fam,
+                    'desc' => 'Standard industrial component ' + prodName + ' for manufacturing operations.',
+                    'price' => price,
+                    'onHand' => onHand,
+                    'threshold' => threshold
+                }
+            );
+        }
+
         Map<String, Product_Inventory__c> existingBySku = new Map<String, Product_Inventory__c>();
         for (
             Product_Inventory__c inv : ProductInventoriesSelector.selectByExternalSkus(catalogBlueprints.keySet())

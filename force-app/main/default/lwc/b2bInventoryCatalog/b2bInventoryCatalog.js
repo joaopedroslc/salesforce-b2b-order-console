@@ -19,6 +19,8 @@ export default class B2bInventoryCatalog extends LightningElement {
     selectedStatus = 'All';
     selectedSort = 'name-asc';
     inventoryItems = [];
+    pageSize = 6;
+    currentPage = 1;
     isLoading = true;
     isSyncing = false;
     wiredCatalogResult;
@@ -38,6 +40,13 @@ export default class B2bInventoryCatalog extends LightningElement {
         { label: 'Price (Low to High)', value: 'price-asc' },
         { label: 'Price (High to Low)', value: 'price-desc' },
         { label: 'Availability (Highest First)', value: 'avail-desc' }
+    ];
+
+    pageSizeOptions = [
+        { label: '6 / page', value: '6' },
+        { label: '12 / page', value: '12' },
+        { label: '24 / page', value: '24' },
+        { label: '50 / page', value: '50' }
     ];
 
     @wire(MessageContext)
@@ -106,21 +115,25 @@ export default class B2bInventoryCatalog extends LightningElement {
         window.clearTimeout(this.searchTimeout);
         this.searchTimeout = window.setTimeout(() => {
             this.isLoading = true;
+            this.currentPage = 1;
             this.searchTerm = value;
         }, DEBOUNCE_DELAY);
     }
 
     handleStatusChange(event) {
         this.isLoading = true;
+        this.currentPage = 1;
         this.selectedStatus = event.detail.value;
     }
 
     handleSortChange(event) {
+        this.currentPage = 1;
         this.selectedSort = event.detail.value;
     }
 
     handleKpiClick(event) {
         const filterType = event.currentTarget.dataset.filter;
+        this.currentPage = 1;
         if (filterType === 'alerts') {
             this.isLoading = true;
             this.selectedStatus = this.selectedStatus === 'Low Stock' ? 'All' : 'Low Stock';
@@ -140,6 +153,7 @@ export default class B2bInventoryCatalog extends LightningElement {
 
     handleClearSearch() {
         this.isLoading = true;
+        this.currentPage = 1;
         this.searchTerm = '';
         const searchInput = this.template.querySelector('lightning-input[type="search"]');
         if (searchInput) {
@@ -149,11 +163,13 @@ export default class B2bInventoryCatalog extends LightningElement {
 
     handleClearStatus() {
         this.isLoading = true;
+        this.currentPage = 1;
         this.selectedStatus = 'All';
     }
 
     handleResetFilters() {
         this.isLoading = true;
+        this.currentPage = 1;
         this.searchTerm = '';
         this.selectedStatus = 'All';
         this.selectedSort = 'name-asc';
@@ -229,6 +245,60 @@ export default class B2bInventoryCatalog extends LightningElement {
         if (this.wiredCatalogResult) {
             await refreshApex(this.wiredCatalogResult);
         }
+    }
+
+    handlePreviousPage() {
+        if (this.currentPage > 1) {
+            this.currentPage -= 1;
+        }
+    }
+
+    handleNextPage() {
+        if (this.currentPage < this.totalPages) {
+            this.currentPage += 1;
+        }
+    }
+
+    handlePageSizeChange(event) {
+        this.pageSize = parseInt(event.detail.value, 10);
+        this.currentPage = 1;
+    }
+
+    get pageSizeValue() {
+        return String(this.pageSize);
+    }
+
+    get totalPages() {
+        if (!this.sortedInventoryItems || this.sortedInventoryItems.length === 0) {
+            return 1;
+        }
+        return Math.ceil(this.sortedInventoryItems.length / this.pageSize);
+    }
+
+    get paginatedInventoryItems() {
+        if (!this.sortedInventoryItems || this.sortedInventoryItems.length === 0) {
+            return [];
+        }
+        const startIndex = (this.currentPage - 1) * this.pageSize;
+        return this.sortedInventoryItems.slice(startIndex, startIndex + this.pageSize);
+    }
+
+    get isFirstPage() {
+        return this.currentPage <= 1;
+    }
+
+    get isLastPage() {
+        return this.currentPage >= this.totalPages;
+    }
+
+    get paginationSummary() {
+        const total = this.sortedInventoryItems ? this.sortedInventoryItems.length : 0;
+        if (total === 0) {
+            return '0 SKUs';
+        }
+        const start = (this.currentPage - 1) * this.pageSize + 1;
+        const end = Math.min(this.currentPage * this.pageSize, total);
+        return `Showing ${start}–${end} of ${total} SKUs`;
     }
 
     get sortedInventoryItems() {

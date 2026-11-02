@@ -22,11 +22,14 @@
         <div class="slds-card__body slds-card__body_inner tracker-body">
             <div class="tracker-status-toolbar slds-m-bottom_small">
                 <template lwc:if={empConnected}>
-                    <lightning-badge
-                        label="Platform Event Auto-Sync Active"
-                        icon-name="utility:broadcast"
-                        class="slds-theme_success"
-                    ></lightning-badge>
+                    <span class="slds-badge slds-theme_success tracker-emp-badge">
+                        <lightning-icon
+                            icon-name="utility:broadcast"
+                            size="xx-small"
+                            class="slds-m-right_xx-small tracker-emp-icon"
+                        ></lightning-icon>
+                        <span>Platform Event Auto-Sync Active</span>
+                    </span>
                 </template>
                 <button
                     type="button"
@@ -118,7 +121,7 @@
                                 <tr class="slds-line-height_reset">
                                     <th scope="col" class="col-order"><div class="slds-truncate" title="Order &amp; Customer">Order / Customer</div></th>
                                     <th scope="col" class="col-amount"><div class="slds-truncate" title="Total &amp; Items">Total / Items</div></th>
-                                    <th scope="col" class="col-status"><div class="slds-truncate" title="Order Status">Status</div></th>
+                                    <th scope="col" class="col-status slds-text-align_center"><div class="slds-truncate" title="Order Status">Status</div></th>
                                     <th scope="col" class="col-erp"><div class="slds-truncate" title="ERP Sync &amp; Ref">ERP Sync &amp; Ref</div></th>
                                     <th scope="col" class="col-actions slds-text-align_right"><div class="slds-truncate" title="Actions">Actions</div></th>
                                 </tr>
@@ -154,25 +157,25 @@
                                                 {ord.Total_Items__c} item(s)
                                             </div>
                                         </td>
-                                        <td class="col-status">
-                                            <div class="slds-m-bottom_xx-small">
+                                        <td class="col-status slds-text-align_center">
+                                            <div class="status-cell-container">
                                                 <span class={ord.statusBadgeClass}>{ord.Status__c}</span>
+                                                <template lwc:if={ord.showProgressBar}>
+                                                    <div class="tracker-progress-wrap">
+                                                        <lightning-progress-indicator
+                                                            current-step={ord.progressStep}
+                                                            type="base"
+                                                            has-error={ord.hasErrorStep}
+                                                            variant="base"
+                                                        >
+                                                            <lightning-progress-step label="Draft" value="Draft"></lightning-progress-step>
+                                                            <lightning-progress-step label="Submitted" value="Submitted"></lightning-progress-step>
+                                                            <lightning-progress-step label="Confirmed" value="Confirmed"></lightning-progress-step>
+                                                            <lightning-progress-step label="Shipped" value="Shipped"></lightning-progress-step>
+                                                        </lightning-progress-indicator>
+                                                    </div>
+                                                </template>
                                             </div>
-                                            <template lwc:if={ord.showProgressBar}>
-                                                <div class="tracker-progress-wrap">
-                                                    <lightning-progress-indicator
-                                                        current-step={ord.progressStep}
-                                                        type="base"
-                                                        has-error={ord.hasErrorStep}
-                                                        variant="base"
-                                                    >
-                                                        <lightning-progress-step label="Draft" value="Draft"></lightning-progress-step>
-                                                        <lightning-progress-step label="Submitted" value="Submitted"></lightning-progress-step>
-                                                        <lightning-progress-step label="Confirmed" value="Confirmed"></lightning-progress-step>
-                                                        <lightning-progress-step label="Shipped" value="Shipped"></lightning-progress-step>
-                                                    </lightning-progress-indicator>
-                                                </div>
-                                            </template>
                                         </td>
                                         <td class="col-erp">
                                             <button

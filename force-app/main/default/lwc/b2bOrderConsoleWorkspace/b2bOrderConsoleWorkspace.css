@@ -46,6 +46,21 @@
     align-items: center;
 }
 
+.header-tag-badge {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    line-height: 1;
+    padding: 0.25rem 0.625rem;
+}
+
+.header-tag-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
 .erp-online-icon {
     --slds-c-icon-color-foreground-default: #ffffff;
     --slds-c-icon-color-foreground: #ffffff;
@@ -219,22 +234,15 @@
 
     .workspace-grid {
         grid-template-columns: minmax(0, 5.5fr) minmax(0, 6.5fr);
-        align-items: stretch;
-        flex: 1 1 auto;
-        min-height: 0;
+        align-items: start;
+        width: 100%;
     }
 
     .workspace-col-left {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        min-height: 0;
+        width: 100%;
     }
 
     .workspace-col-right {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        min-height: 0;
+        width: 100%;
     }
 }

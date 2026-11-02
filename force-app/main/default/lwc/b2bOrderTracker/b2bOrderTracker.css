@@ -2,13 +2,10 @@
     display: block;
     width: 100%;
     max-width: 100%;
-    height: 100%;
 }
 
 .tracker-card {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+    height: auto;
 }
 
 .card-header-centered {
@@ -33,15 +30,10 @@
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 auto;
-    min-height: 0;
 }
 
 .tracker-table-container {
-    flex: 1 1 auto;
-    min-height: 0;
+    max-height: 22rem;
     overflow-y: auto;
     overflow-x: hidden;
 }
@@ -69,6 +61,16 @@
 
 .col-status {
     width: 22%;
+    text-align: center;
+}
+
+.status-cell-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    width: 100%;
 }
 
 .col-erp {
@@ -80,12 +82,32 @@
 }
 
 .tracker-progress-wrap {
-    min-width: 5.5rem;
-    max-width: 8.5rem;
+    width: 7.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+.tracker-emp-badge {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    line-height: 1;
+    padding: 0.25rem 0.625rem;
+}
+
+.tracker-emp-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    --slds-c-icon-color-foreground-default: #ffffff;
+    --slds-c-icon-color-foreground: #ffffff;
+    --sds-c-icon-color-foreground-default: #ffffff;
+    --sds-c-icon-color-foreground: #ffffff;
+    --lwc-colorTextIconDefault: #ffffff;
 }
 
 .tracker-empty-state {
-    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
     align-items: center;

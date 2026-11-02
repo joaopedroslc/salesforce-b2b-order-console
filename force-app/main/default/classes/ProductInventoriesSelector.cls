@@ -100,7 +100,7 @@ public inherited sharing class ProductInventoriesSelector {
         if (!whereClauses.isEmpty()) {
             soql += ' WHERE ' + String.join(whereClauses, ' AND ');
         }
-        soql += ' ORDER BY Product__r.Name ASC LIMIT 200';
+        soql += ' ORDER BY Product__r.Name ASC LIMIT 500';
 
         return (List<Product_Inventory__c>) Database.queryWithBinds(
             soql,

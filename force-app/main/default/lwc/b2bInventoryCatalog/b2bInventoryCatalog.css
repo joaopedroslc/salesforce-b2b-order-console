@@ -2,13 +2,10 @@
     display: block;
     width: 100%;
     max-width: 100%;
-    height: 100%;
 }
 
 .catalog-card {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+    height: auto;
 }
 
 .card-header-centered {
@@ -33,16 +30,26 @@
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 auto;
-    min-height: 0;
 }
 
 .catalog-table-container {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
+    max-height: none;
+    overflow-x: auto;
+}
+
+.catalog-table-container table {
+    height: auto;
+}
+
+.catalog-table-container tbody tr {
+    height: auto;
+}
+
+.catalog-table-container th,
+.catalog-table-container td {
+    padding-top: 0.375rem;
+    padding-bottom: 0.375rem;
+    vertical-align: middle;
 }
 
 .catalog-table-container thead th {
@@ -53,8 +60,39 @@
     box-shadow: inset 0 -1px 0 var(--lwc-colorBorder, #e5e5e5);
 }
 
+.pagination-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--lwc-colorBorder, #e5e5e5);
+}
+
+.pagination-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.pagination-nav-btn {
+    width: 1.75rem;
+    height: 1.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.page-indicator {
+    white-space: nowrap;
+}
+
+.pagination-size-select {
+    width: 6.5rem;
+}
+
 .catalog-empty-state {
-    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
     align-items: center;
