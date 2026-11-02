@@ -81,7 +81,11 @@
 }
 
 .cart-max-height {
-    max-height: 18rem;
+    max-height: 14rem;
+}
+
+.empty-cart-box {
+    padding: 1.5rem 1rem;
 }
 
 .financial-summary-card {

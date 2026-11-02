@@ -1,5 +1,5 @@
 <template>
-    <article class="slds-card slds-card_boundary">
+    <article class="slds-card slds-card_boundary catalog-card">
         <div class="slds-card__header slds-grid card-header-centered">
             <header class="slds-media slds-media_center card-header-media">
                 <div class="slds-media__figure">
@@ -196,7 +196,7 @@
             </template>
 
             <template lwc:elseif={hasInventoryItems}>
-                <div class="desktop-only-view slds-scrollable_y catalog-max-height">
+                <div class="desktop-only-view slds-scrollable_y catalog-table-container">
                     <table
                         class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped slds-table_col-bordered"
                         aria-label="B2B Warehouse Inventory Catalog"
@@ -340,7 +340,7 @@
 
             <template lwc:else>
                 <template lwc:if={isDatabaseEmpty}>
-                    <div class="slds-box slds-theme_shade slds-card_boundary slds-p-around_large slds-text-align_center">
+                    <div class="slds-box slds-theme_shade slds-card_boundary slds-p-around_large slds-text-align_center catalog-empty-state">
                         <div class="slds-m-bottom_small">
                             <lightning-icon icon-name="standard:product" size="large" alternative-text="No Catalog Inventory"></lightning-icon>
                         </div>
@@ -360,7 +360,7 @@
                     </div>
                 </template>
                 <template lwc:else>
-                    <div class="slds-box slds-theme_shade slds-card_boundary slds-p-around_large slds-text-align_center">
+                    <div class="slds-box slds-theme_shade slds-card_boundary slds-p-around_large slds-text-align_center catalog-empty-state">
                         <div class="slds-m-bottom_small">
                             <lightning-icon icon-name="utility:search" size="large" alternative-text="No Matching Products"></lightning-icon>
                         </div>

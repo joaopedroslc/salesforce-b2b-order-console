@@ -2,6 +2,13 @@
     display: block;
     width: 100%;
     max-width: 100%;
+    height: 100%;
+}
+
+.tracker-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .card-header-centered {
@@ -26,6 +33,64 @@
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.tracker-table-container {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.tracker-table-container thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: var(--lwc-colorBackgroundRowHover, #f3f3f3);
+    box-shadow: inset 0 -1px 0 var(--lwc-colorBorder, #e5e5e5);
+}
+
+.tracker-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.col-order {
+    width: 25%;
+}
+
+.col-amount {
+    width: 17%;
+}
+
+.col-status {
+    width: 22%;
+}
+
+.col-erp {
+    width: 18%;
+}
+
+.col-actions {
+    width: 18%;
+}
+
+.tracker-progress-wrap {
+    min-width: 5.5rem;
+    max-width: 8.5rem;
+}
+
+.tracker-empty-state {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 10rem;
 }
 
 .tracker-status-toolbar {

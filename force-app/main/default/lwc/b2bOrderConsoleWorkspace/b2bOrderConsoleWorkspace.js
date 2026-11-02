@@ -129,15 +129,15 @@ export default class B2bOrderConsoleWorkspace extends LightningElement {
 
     get builderWrapperClass() {
         if (this.activeMobileTab === 'orders') {
-            return 'slds-m-bottom_medium mobile-pane-hidden';
+            return 'workspace-builder-wrapper mobile-pane-hidden';
         }
-        return 'slds-m-bottom_medium';
+        return 'workspace-builder-wrapper';
     }
 
     get trackerWrapperClass() {
         if (this.activeMobileTab === 'cart') {
-            return 'mobile-pane-hidden';
+            return 'workspace-tracker-wrapper mobile-pane-hidden';
         }
-        return '';
+        return 'workspace-tracker-wrapper';
     }
 }

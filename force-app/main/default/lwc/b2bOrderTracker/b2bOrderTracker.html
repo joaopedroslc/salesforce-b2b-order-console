@@ -1,5 +1,5 @@
 <template>
-    <article class="slds-card slds-card_boundary">
+    <article class="slds-card slds-card_boundary tracker-card">
         <div class="slds-card__header slds-grid card-header-centered">
             <header class="slds-media slds-media_center card-header-media">
                 <div class="slds-media__figure">
@@ -109,27 +109,28 @@
                 </template>
 
                 <template lwc:if={hasFilteredOrders}>
-                    <div class="desktop-only-view slds-scrollable_x">
+                    <div class="desktop-only-view tracker-table-container slds-scrollable_y">
                         <table
-                            class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped"
+                            class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped tracker-table"
                             aria-label="B2B Order and ERP Fulfillment Monitor"
                         >
                             <thead>
                                 <tr class="slds-line-height_reset">
-                                    <th scope="col"><div class="slds-truncate" title="Order #">Order #</div></th>
-                                    <th scope="col"><div class="slds-truncate" title="Customer Account">Customer</div></th>
-                                    <th scope="col"><div class="slds-truncate" title="Items">Line Items</div></th>
-                                    <th scope="col"><div class="slds-truncate" title="Total Amount">Total Amount</div></th>
-                                    <th scope="col"><div class="slds-truncate" title="Order Status">Order Status</div></th>
-                                    <th scope="col"><div class="slds-truncate" title="ERP Sync / Ref">ERP Sync &amp; Ref</div></th>
-                                    <th scope="col"><div class="slds-truncate" title="Lifecycle Actions">Lifecycle Actions</div></th>
+                                    <th scope="col" class="col-order"><div class="slds-truncate" title="Order &amp; Customer">Order / Customer</div></th>
+                                    <th scope="col" class="col-amount"><div class="slds-truncate" title="Total &amp; Items">Total / Items</div></th>
+                                    <th scope="col" class="col-status"><div class="slds-truncate" title="Order Status">Status</div></th>
+                                    <th scope="col" class="col-erp"><div class="slds-truncate" title="ERP Sync &amp; Ref">ERP Sync &amp; Ref</div></th>
+                                    <th scope="col" class="col-actions slds-text-align_right"><div class="slds-truncate" title="Actions">Actions</div></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <template for:each={filteredOrders} for:item="ord">
                                     <tr key={ord.Id} class="slds-hint-parent">
-                                        <th scope="row">
-                                            <div class="slds-text-title_bold">{ord.Name}</div>
+                                        <th scope="row" class="col-order">
+                                            <div class="slds-text-title_bold slds-truncate" title={ord.Name}>{ord.Name}</div>
+                                            <div class="slds-text-body_small slds-truncate slds-text-color_default" title={ord.accountName}>
+                                                {ord.accountName}
+                                            </div>
                                             <div class="slds-text-body_small slds-text-color_weak">
                                                 <lightning-formatted-date-time
                                                     value={ord.CreatedDate}
@@ -141,51 +142,39 @@
                                                 ></lightning-formatted-date-time>
                                             </div>
                                         </th>
-                                        <td>
-                                            <div class="slds-truncate" title={ord.accountName}>{ord.accountName}</div>
-                                        </td>
-                                        <td>
-                                            <div class="slds-text-body_small">
-                                                <span class="slds-text-title_bold">{ord.Total_Items__c}</span> item(s)
-                                            </div>
-                                            <template lwc:if={ord.hasLineItems}>
-                                                <div class="slds-text-body_small slds-text-color_weak">
-                                                    <template for:each={ord.lineItems} for:item="li">
-                                                        <div key={li.Id}>
-                                                            {li.Quantity__c}x {li.productName}
-                                                        </div>
-                                                    </template>
-                                                </div>
-                                            </template>
-                                        </td>
-                                        <td>
-                                            <span class="slds-text-title_bold">
+                                        <td class="col-amount">
+                                            <div class="slds-text-title_bold">
                                                 <lightning-formatted-number
                                                     value={ord.Total_Amount__c}
                                                     format-style="currency"
                                                     currency-code="USD"
                                                 ></lightning-formatted-number>
-                                            </span>
+                                            </div>
+                                            <div class="slds-text-body_small slds-text-color_weak">
+                                                {ord.Total_Items__c} item(s)
+                                            </div>
                                         </td>
-                                        <td>
+                                        <td class="col-status">
                                             <div class="slds-m-bottom_xx-small">
                                                 <span class={ord.statusBadgeClass}>{ord.Status__c}</span>
                                             </div>
                                             <template lwc:if={ord.showProgressBar}>
-                                                <lightning-progress-indicator
-                                                    current-step={ord.progressStep}
-                                                    type="base"
-                                                    has-error={ord.hasErrorStep}
-                                                    variant="base"
-                                                >
-                                                    <lightning-progress-step label="Draft" value="Draft"></lightning-progress-step>
-                                                    <lightning-progress-step label="Submitted" value="Submitted"></lightning-progress-step>
-                                                    <lightning-progress-step label="Confirmed" value="Confirmed"></lightning-progress-step>
-                                                    <lightning-progress-step label="Shipped" value="Shipped"></lightning-progress-step>
-                                                </lightning-progress-indicator>
+                                                <div class="tracker-progress-wrap">
+                                                    <lightning-progress-indicator
+                                                        current-step={ord.progressStep}
+                                                        type="base"
+                                                        has-error={ord.hasErrorStep}
+                                                        variant="base"
+                                                    >
+                                                        <lightning-progress-step label="Draft" value="Draft"></lightning-progress-step>
+                                                        <lightning-progress-step label="Submitted" value="Submitted"></lightning-progress-step>
+                                                        <lightning-progress-step label="Confirmed" value="Confirmed"></lightning-progress-step>
+                                                        <lightning-progress-step label="Shipped" value="Shipped"></lightning-progress-step>
+                                                    </lightning-progress-indicator>
+                                                </div>
                                             </template>
                                         </td>
-                                        <td>
+                                        <td class="col-erp">
                                             <button
                                                 type="button"
                                                 class="slds-button slds-button_neutral erp-inspect-btn"
@@ -200,11 +189,11 @@
                                                 {ord.syncStatusDisplay}
                                             </div>
                                         </td>
-                                        <td>
+                                        <td class="col-actions slds-text-align_right">
                                             <lightning-button-group>
                                                 <template lwc:if={ord.canSubmit}>
                                                     <lightning-button
-                                                        label="Submit to ERP"
+                                                        label="Submit"
                                                         variant="brand"
                                                         data-id={ord.Id}
                                                         data-status="Submitted"
@@ -214,7 +203,7 @@
                                                 </template>
                                                 <template lwc:if={ord.canShip}>
                                                     <lightning-button
-                                                        label="Mark Shipped"
+                                                        label="Ship"
                                                         variant="success"
                                                         data-id={ord.Id}
                                                         data-status="Shipped"
@@ -361,7 +350,7 @@
                 </template>
 
                 <template lwc:else>
-                    <div class="slds-box slds-theme_shade slds-card_boundary slds-p-around_large slds-text-align_center">
+                    <div class="slds-box slds-theme_shade slds-card_boundary slds-p-around_large slds-text-align_center tracker-empty-state">
                         <div class="slds-m-bottom_small">
                             <lightning-icon icon-name="utility:search" size="large" alternative-text="No Orders Found"></lightning-icon>
                         </div>
@@ -382,7 +371,7 @@
             </template>
 
             <template lwc:else>
-                <div class="slds-box slds-theme_shade slds-card_boundary slds-p-around_large slds-text-align_center">
+                <div class="slds-box slds-theme_shade slds-card_boundary slds-p-around_large slds-text-align_center tracker-empty-state">
                     <div class="slds-m-bottom_small">
                         <lightning-icon icon-name="standard:fulfillment_order" size="large" alternative-text="No Orders"></lightning-icon>
                     </div>
