@@ -214,7 +214,6 @@
 
 @media (min-width: 1024px) {
     .workspace-root {
-        min-height: calc(100vh - 6.5rem);
         display: flex;
         flex-direction: column;
     }

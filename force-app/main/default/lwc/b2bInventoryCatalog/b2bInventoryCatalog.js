@@ -278,7 +278,7 @@ export default class B2bInventoryCatalog extends LightningElement {
         const headerHeight = thead ? thead.offsetHeight : 34;
         const availableHeight = clientHeight - headerHeight;
         const rowHeight = 34;
-        const computedSize = Math.max(6, Math.floor(availableHeight / rowHeight));
+        const computedSize = Math.max(6, Math.min(10, Math.floor(availableHeight / rowHeight)));
         if (computedSize !== this.pageSize) {
             this.pageSize = computedSize;
             if (this.currentPage > this.totalPages) {
