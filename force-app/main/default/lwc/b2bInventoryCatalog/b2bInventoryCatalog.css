@@ -37,19 +37,66 @@
     overflow-x: auto;
 }
 
-.catalog-table-container table {
-    height: auto;
+.catalog-table {
+    table-layout: auto;
 }
 
-.catalog-table-container tbody tr {
-    height: auto;
+.catalog-table tbody tr {
+    height: 2.125rem;
 }
 
-.catalog-table-container th,
-.catalog-table-container td {
-    padding-top: 0.375rem;
-    padding-bottom: 0.375rem;
+.catalog-table th,
+.catalog-table td {
+    padding-top: 0.2rem !important;
+    padding-bottom: 0.2rem !important;
     vertical-align: middle;
+}
+
+.catalog-table .slds-badge {
+    padding: 0.125rem 0.5rem;
+    font-size: 0.6875rem;
+    line-height: 1.2;
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+}
+
+.product-title {
+    font-size: 0.8125rem;
+    line-height: 1.15;
+}
+
+.product-subtitle {
+    font-size: 0.6875rem;
+    line-height: 1.1;
+}
+
+.catalog-action-btn {
+    height: 1.625rem;
+    min-height: 1.625rem;
+    line-height: 1;
+    padding: 0 0.5rem;
+    font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+.action-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: -1px;
+}
+
+.toolbar-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: -1px;
 }
 
 .catalog-table-container thead th {

@@ -198,7 +198,7 @@
             <template lwc:elseif={hasInventoryItems}>
                 <div class="desktop-only-view slds-scrollable_y catalog-table-container">
                     <table
-                        class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped slds-table_col-bordered"
+                        class="slds-table slds-table_compact slds-table_cell-buffer slds-table_bordered slds-table_striped slds-table_col-bordered catalog-table"
                         aria-label="B2B Warehouse Inventory Catalog"
                     >
                         <thead>
@@ -216,10 +216,10 @@
                             <template for:each={paginatedInventoryItems} for:item="item">
                                 <tr key={item.Id} class="slds-hint-parent">
                                     <th scope="row">
-                                        <div class="slds-text-title_bold slds-truncate" title={item.productName}>
+                                        <div class="slds-text-title_bold slds-truncate product-title" title={item.productName}>
                                             {item.productName}
                                         </div>
-                                        <div class="slds-text-body_small slds-text-color_weak">
+                                        <div class="slds-text-body_small slds-text-color_weak product-subtitle">
                                             {item.External_SKU__c} &bull; {item.productFamily}
                                         </div>
                                     </th>
@@ -242,22 +242,24 @@
                                         <template lwc:if={item.isOutOfStock}>
                                             <button
                                                 type="button"
-                                                class="slds-button slds-button_neutral action-backorder-btn"
+                                                class="slds-button slds-button_neutral action-backorder-btn catalog-action-btn"
                                                 disabled
                                                 title="Zero stock available - backorder required"
                                             >
-                                                <lightning-icon icon-name="utility:clock" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                                <lightning-icon icon-name="utility:clock" size="xx-small" class="slds-m-right_xx-small action-btn-icon"></lightning-icon>
                                                 <span>Backorder</span>
                                             </button>
                                         </template>
                                         <template lwc:else>
-                                            <lightning-button
-                                                label="Add to Order"
-                                                icon-name="utility:add"
-                                                variant="neutral"
+                                            <button
+                                                type="button"
+                                                class="slds-button slds-button_neutral catalog-action-btn"
                                                 data-id={item.Id}
                                                 onclick={handleAddToOrder}
-                                            ></lightning-button>
+                                            >
+                                                <lightning-icon icon-name="utility:add" size="xx-small" class="slds-m-right_xx-small action-btn-icon"></lightning-icon>
+                                                <span>Add to Order</span>
+                                            </button>
                                         </template>
                                     </td>
                                 </tr>

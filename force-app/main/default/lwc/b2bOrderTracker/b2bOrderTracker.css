@@ -83,8 +83,14 @@
 
 .tracker-progress-wrap {
     width: 7.5rem;
+    margin: 0 auto;
     display: flex;
     justify-content: center;
+}
+
+.tracker-progress-wrap lightning-progress-indicator {
+    display: block;
+    width: 100%;
 }
 
 .tracker-emp-badge {
@@ -100,6 +106,7 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    margin-top: -1px;
     --slds-c-icon-color-foreground-default: #ffffff;
     --slds-c-icon-color-foreground: #ffffff;
     --sds-c-icon-color-foreground-default: #ffffff;
@@ -148,6 +155,7 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    margin-top: -1px;
 }
 
 .tracker-filter-grid {
@@ -185,6 +193,14 @@
     line-height: 1;
     display: inline-flex;
     align-items: center;
+}
+
+.erp-inspect-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: -1px;
 }
 
 .erp-inspect-link {
