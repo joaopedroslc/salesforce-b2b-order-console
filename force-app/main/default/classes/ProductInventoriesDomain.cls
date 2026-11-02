@@ -1,6 +1,6 @@
 /**
  * @description Domain Layer for Product_Inventory__c.
- *              Encapsulates field defaulting, SKU normalization, and stock level invariants.
+ *              Enforces field defaults, uppercase SKU normalization, and non-negative stock invariants.
  */
 public inherited sharing class ProductInventoriesDomain {
     public static final Decimal DEFAULT_REORDER_THRESHOLD = 10;

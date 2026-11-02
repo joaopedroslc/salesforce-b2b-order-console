@@ -2,7 +2,7 @@ import { LightningElement, api } from 'lwc';
 
 /**
  * @description Child line item component for active order builder cards.
- *              Encapsulates quantity stepping, real-time stock clamping, and dynamic line-total calculation.
+ *              Handles quantity stepping, stock limit clamping on blur, and line-total calculation.
  */
 export default class B2bOrderLineItem extends LightningElement {
     @api item;

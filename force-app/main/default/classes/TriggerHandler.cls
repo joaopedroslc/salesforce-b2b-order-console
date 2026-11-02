@@ -1,6 +1,6 @@
 /**
- * @description Lightweight, enterprise-grade Trigger Handler base class implementing
- *              Separation of Concerns, context dispatch, recursion protection, and static bypass controls.
+ * @description Base Trigger Handler class providing context routing (`beforeInsert`, `afterUpdate`, etc.)
+ *              and static handler bypass controls (`TriggerHandler.bypass()`).
  */
 public virtual inherited sharing class TriggerHandler {
     @TestVisible

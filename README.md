@@ -1,27 +1,27 @@
 # Salesforce B2B Order & Inventory Console
 
-A production-grade Salesforce DX (SFDX) portfolio application demonstrating **Apex Enterprise Patterns (Separation of Concerns)**, **strict CRUD/FLS security (`WITH USER_MODE` & `Security.stripInaccessible`)**, **Named Credential REST Callout Integration**, **Event-Driven Asynchronous Processing (`Queueable` + `Platform Events`)**, and **modern Lightning Web Components (SLDS, LMS, Custom Events, and `lightning/empApi`)**.
+Salesforce DX application implementing Apex Enterprise Patterns (Trigger Handler, Selector, Domain, Service, and Controller layers), CRUD/FLS enforcement via `AccessLevel.USER_MODE` and `Security.stripInaccessible()`, Named Credential REST callouts (`callout:ERP_Inventory_API`), asynchronous Queueable processing (`Database.AllowsCallouts`), Platform Events (`Order_Status_Event__e`), and Lightning Web Components built on SLDS and Lightning Message Service (`B2B_Order_Channel__c`).
 
 ---
 
 ## Table of Contents
-1. [Executive Overview](#1-executive-overview)
+1. [Overview](#1-overview)
 2. [System Architecture & Event Flow](#2-system-architecture--event-flow)
 3. [Data Model (ERD)](#3-data-model-erd)
-4. [Enterprise Apex Architecture (Separation of Concerns)](#4-enterprise-apex-architecture-separation-of-concerns)
-5. [LWC Frontend & SLDS Design System](#5-lwc-frontend--slds-design-system)
-6. [Deployment & Quickstart Guide](#6-deployment--quickstart-guide)
-7. [End-to-End QA & Live Demo Test Guide](#7-end-to-end-qa--live-demo-test-guide)
+4. [Apex Backend Architecture](#4-apex-backend-architecture)
+5. [LWC Frontend & SLDS Architecture](#5-lwc-frontend--slds-architecture)
+6. [Deployment & Quickstart](#6-deployment--quickstart)
+7. [End-to-End QA Walkthrough](#7-end-to-end-qa-walkthrough)
 
 ---
 
-## 1. Executive Overview
+## 1. Overview
 
-The **B2B Order & Inventory Console** is a unified workspace designed for B2B account managers and fulfillment operations teams to:
-* Browse real-time warehouse stock (`On Hand`, `Reserved`, and `Available` quantities) across catalog products (`Product2` + `Product_Inventory__c`).
-* Synchronize live inventory levels on-demand with an external ERP endpoint via a Salesforce **Named Credential** (`callout:ERP_Inventory_API`).
-* Build, validate, and submit multi-line B2B customer orders (`B2B_Order__c` + `B2B_Order_Item__c`) with instant stock reservation and rollback safety.
-* Process ERP order confirmations asynchronously via **`Queueable` Apex (`Database.AllowsCallouts`)** and broadcast live updates back to the UI using **Platform Events (`Order_Status_Event__e`)** and **`lightning/empApi`**.
+The B2B Order & Inventory Console provides a two-column workspace for B2B account managers and fulfillment teams to check real-time warehouse stock, synchronize inventory with an external ERP endpoint, and submit multi-line customer orders.
+
+Users browse catalog inventory (`Product2` and `Product_Inventory__c`) with real-time `On_Hand_Quantity__c`, `Reserved_Quantity__c`, and formula-calculated `Available_Quantity__c` metrics. On-demand synchronization sends an outbound HTTPS POST request through the `ERP_Inventory_API` Named Credential to replenish low-stock SKUs.
+
+When an order (`B2B_Order__c` and `B2B_Order_Item__c`) is submitted, `B2BOrderService` wraps header creation, line item insertion, and status transition inside a `Database.setSavepoint()` transaction. `B2BOrdersDomain` locks the requested stock on `Product_Inventory__c` and enqueues `ERPOrderSyncQueueable`. The Queueable worker executes the outbound ERP REST callout and publishes an `Order_Status_Event__e` Platform Event, which updates the order to `Confirmed` or `Backordered` and notifies the UI.
 
 ---
 
@@ -33,7 +33,7 @@ flowchart TD
         Catalog["b2bInventoryCatalog (LWC)<br/>Search, Stock Filter, ERP Sync"]
         Builder["b2bOrderBuilder (LWC)<br/>Account Cart & Order Submission"]
         LineItem["b2bOrderLineItem (Child LWC)<br/>@api + CustomEvents"]
-        Tracker["b2bOrderTracker (LWC)<br/>Order Lifecycle & empApi Listener"]
+        Tracker["b2bOrderTracker (LWC)<br/>Order Lifecycle & Event Monitor"]
         LMS(("Lightning Message Service<br/>B2B_Order_Channel__c"))
 
         Catalog -->|"Publishes ADD_TO_ORDER"| LMS
@@ -44,9 +44,9 @@ flowchart TD
         LMS -->|"Refreshes Orders"| Tracker
     end
 
-    subgraph Apex_Layers["Enterprise Apex Backend (Separation of Concerns)"]
+    subgraph Apex_Layers["Apex Backend Layers"]
         Controller["B2BOrderConsoleController<br/>(@AuraEnabled Entrypoint)"]
-        Service["B2BOrderService<br/>(Transaction Savepoints & StripInaccessible)"]
+        Service["B2BOrderService<br/>(Savepoints & StripInaccessible)"]
         Selector["B2BOrdersSelector & ProductInventoriesSelector<br/>(SOQL WITH USER_MODE)"]
         Trigger["B2BOrderTrigger & B2BOrderItemTrigger<br/>(TriggerHandler Framework)"]
         Domain["B2BOrdersDomain & B2BOrderItemsDomain<br/>(Validation, State Machine, Stock Reservation)"]
@@ -69,7 +69,7 @@ flowchart TD
     Queueable -->|"EventBus.publish()"| PE
     PE -->|"After Insert"| PETrigger
     PETrigger -->|"Updates Status to Confirmed"| Service
-    PE -->|"Streaming API (empApi)"| Tracker
+    PE -->|"Event Notification"| Tracker
 ```
 
 ---
@@ -126,34 +126,37 @@ erDiagram
 
 ---
 
-## 4. Enterprise Apex Architecture (Separation of Concerns)
+## 4. Apex Backend Architecture
 
-| Architectural Layer | Classes | Responsibility |
+| Layer | Classes | Responsibility |
 | :--- | :--- | :--- |
-| **Trigger Framework** | `TriggerHandler`, `B2BOrderTriggerHandler`, `B2BOrderItemTriggerHandler`, `ProductInventoryTriggerHandler`, `OrderStatusEventTriggerHandler` | Context dispatch (`beforeInsert`, `afterUpdate`, etc.), static bypass API (`TriggerHandler.bypass()`), recursion guards, and zero business logic in triggers. |
-| **Selector Layer** | `ProductInventoriesSelector`, `B2BOrdersSelector` | Encapsulates all SOQL queries with strict **`WITH USER_MODE`** enforcement, bulkified `Set<Id>` parameters, and dynamic catalog search/filtering. |
-| **Domain Layer** | `B2BOrdersDomain`, `B2BOrderItemsDomain`, `ProductInventoriesDomain` | Enforces SObject state machines (`Draft` → `Submitted` → `Confirmed` → `Shipped` / `Cancelled`), Draft-only item lock rules, SKU normalization, and bulkified inventory reservation/deduction/release across 200+ records. |
-| **Service Layer** | `B2BOrderService`, `ERPInventoryCalloutService`, `ERPOrderSyncQueueable` | Orchestrates atomic multi-object transactions (`Database.setSavepoint()` / `Database.rollback()`), `Security.stripInaccessible`, Named Credential REST callouts, governor-safe Queueable chunking (`MAX_CALLOUTS_PER_TRANSACTION = 90`), and Platform Event publishing. |
-| **Controller Layer** | `B2BOrderConsoleController` | Thin `@AuraEnabled` boundary delegating to Service and Selector layers with clean `AuraHandledException` mapping. |
-| **Test Suite (`91%` Coverage)** | `B2BOrderConsoleTest`, `B2BTestDataFactory`, `ERPInventoryHttpCalloutMock` | Verifies positive flows, negative validation guardrails, HTTP `200`/`409`/`500` callout mocks, and 210-order bulkification without hitting governor limits. |
+| Trigger Framework | `TriggerHandler`, `B2BOrderTriggerHandler`, `B2BOrderItemTriggerHandler`, `ProductInventoryTriggerHandler`, `OrderStatusEventTriggerHandler` | Dispatches trigger contexts (`beforeInsert`, `afterUpdate`, etc.), enforces recursion guards, and exposes static bypass controls (`TriggerHandler.bypass()`). |
+| Selector Layer | `ProductInventoriesSelector`, `B2BOrdersSelector` | Executes parameterized SOQL queries via `Database.queryWithBinds` with `AccessLevel.USER_MODE` enforcement and `Set<Id>` bulk inputs. |
+| Domain Layer | `B2BOrdersDomain`, `B2BOrderItemsDomain`, `ProductInventoriesDomain` | Enforces order state transitions (`Draft` to `Submitted` to `Confirmed` to `Shipped` or `Cancelled`), blocks edits on non-Draft line items, normalizes SKUs to uppercase, and calculates bulk inventory reservations, deductions, and releases. |
+| Service Layer | `B2BOrderService`, `ERPInventoryCalloutService`, `ERPOrderSyncQueueable` | Coordinates multi-object DML inside `Database.setSavepoint()` transactions, strips inaccessible fields with `Security.stripInaccessible()`, performs Named Credential REST callouts, chunks Queueable callouts at `MAX_CALLOUTS_PER_TRANSACTION = 90`, and publishes `Order_Status_Event__e` events. |
+| Controller Layer | `B2BOrderConsoleController` | Exposes `@AuraEnabled` methods for LWC callers and maps backend exceptions to `AuraHandledException`. |
+| Test Suite (92% Coverage) | `B2BOrderConsoleTest`, `B2BTestDataFactory`, `ERPInventoryHttpCalloutMock` | Tests positive order flows, negative domain validations, HTTP `200`/`409`/`500` callout mocks, Guest User execution, and 210-order bulk submissions using `System.Assert`. |
 
 ---
 
-## 5. LWC Frontend & SLDS Design System
+## 5. LWC Frontend & SLDS Architecture
 
-The frontend is built strictly on the **Salesforce Lightning Design System (SLDS)**:
-* **100% Native SLDS Utility & Component Styling:** Uses `slds-box`, `slds-theme_shade`, `slds-badge` (`slds-theme_success`, `slds-theme_warning`, `slds-theme_error`, `slds-badge_lightest`), `slds-table_striped`, `slds-table_col-bordered`, `lightning-button-group`, `slds-scrollable_y`, and SLDS Styling Hooks (`var(--lwc-colorBackgroundRowHover)`).
-* **Cross-DOM Sibling Decoupling via LMS (`B2B_Order_Channel__c`):** `b2bInventoryCatalog`, `b2bOrderBuilder`, and `b2bOrderTracker` communicate across independent FlexiPage regions without tight coupling.
-* **Parent-Child Composition (`@api` + `CustomEvent`):** `b2bOrderBuilder` passes line state down to `b2bOrderLineItem` via `@api item` and listens for `quantitychange` and `removeitem` custom events.
-* **Real-Time Streaming (`lightning/empApi`):** `b2bOrderTracker` subscribes to `/event/Order_Status_Event__e` to display instant ERP confirmation toasts and refresh stock/order tables automatically.
+The UI consists of five Lightning Web Components styled with SLDS utility classes (`slds-box`, `slds-theme_shade`, `slds-badge`, `slds-table_striped`, `slds-table_col-bordered`) and SLDS design tokens.
+
+`b2bOrderConsoleWorkspace` serves as the top-level container for Lightning App Pages and Experience Cloud sites. On desktop viewports (`>= 1024px`), it renders the catalog in the left column and the order builder and fulfillment tracker in the right column. On mobile and tablet viewports (`< 1024px`), it provides a tab switcher bar (`Catalog`, `Cart`, `Orders`, `All`) with active flex expansion and a pulse animation on the `Cart` tab when items are added.
+
+`b2bInventoryCatalog` displays warehouse inventory with interactive KPI filter cards, a 300ms debounced search input, stock status and sort selectors, removable filter pills, and action buttons for seeding demo records and syncing with the ERP endpoint.
+
+`b2bOrderBuilder` and its child component `b2bOrderLineItem` manage the active customer cart. `b2bOrderBuilder` displays an account terms strip (`Tier 1 Wholesale`, `Net 30`, `Free Ground Freight`) and a financial summary box, passing each cart line down via `@api item` and listening for `quantitychange` and `removeitem` custom events. `b2bOrderLineItem` clamps manual quantity inputs between `1` and `availableQuantity` on blur.
+
+`b2bOrderTracker` monitors submitted orders, providing search and lifecycle filtering, an SLDS progress indicator (`Draft` to `Submitted` to `Confirmed` to `Shipped`), an ERP telemetry inspection modal, and automatic polling when orders are awaiting asynchronous `Order_Status_Event__e` confirmation. Cross-component communication runs over the `B2B_Order_Channel__c` Lightning Message Channel.
 
 ---
 
-## 6. Deployment & Quickstart Guide
+## 6. Deployment & Quickstart
 
 ### Prerequisites
-* Salesforce CLI (`sf`) v2.x+
-* An authenticated Salesforce Developer Edition or Scratch Org
+Install Salesforce CLI (`sf` v2.x+) and authenticate a Salesforce Developer Edition or Scratch Org.
 
 ### 1. Clone the Repository
 ```bash
@@ -173,26 +176,25 @@ sf project deploy start --source-dir force-app/main/default
 sf org assign permset --name B2B_Order_Console_Admin
 ```
 
-### 4. Run the Apex Test Suite with Code Coverage
+### 4. Run the Apex Test Suite
 ```bash
 sf apex run test --class-names B2BOrderConsoleTest --code-coverage --result-format human --synchronous
 ```
 
-### 5. Launch the Application (Internal Lightning Experience)
-1. Run `sf org open` to open your Salesforce org.
-2. Click the **App Launcher** (9 dots in the top-left corner) and search for **B2B Order Console**.
-3. Click **Seed Demo Data** in the top-right of the **B2B Warehouse Inventory Catalog** card to populate sample B2B Accounts, Products, and Inventory records.
+### 5. Open the Application in Lightning Experience
+Run `sf org open`, open the App Launcher, and select **B2B Order Console**. Click **Seed Data** in the **B2B Inventory Catalog** header to create sample B2B Accounts, Products, and Inventory records.
 
-### 6. Publish as a Public Live Portfolio Site (Experience Cloud)
-All components (`b2bOrderConsoleWorkspace`, `b2bInventoryCatalog`, `b2bOrderBuilder`, and `b2bOrderTracker`) are configured with `lightningCommunity__Page` and `lightningCommunity__Default` targets, plus controlled Guest User demo support in `B2BOrderConsoleController`:
-1. In **Setup**, search for **Digital Experiences** → **Settings**, check **Enable Digital Experiences**, and click **Save**.
-2. Go to **Setup** → **Digital Experiences** → **All Sites** → **New**, choose the **Build Your Own (Aura)** or **Customer Account Portal** template, name it `B2B Order Console Portfolio`, and click **Create**.
-3. In **Administration** → **Preferences**, check **Give access to public API requests on Chatter** and click **Save**.
-4. Open **Builder**, click the **Settings (Gear icon)** → **General**, check **Public Access ("Guest users can see and interact with the site without logging in")**, and click the **Guest User Profile** link → **Enabled Apex Class Access** → **Edit** → add `B2BOrderConsoleController` → **Save**.
-5. In **Builder** → **Components** (lightning bolt icon), drag **B2B Order Console Workspace (All-in-One)** (`c-b2b-order-console-workspace`) onto the Home page content region and click **Publish**.
+### 6. Experience Cloud Site Configuration
+All components include `lightningCommunity__Page` and `lightningCommunity__Default` targets, and `B2BOrderConsoleController` includes a `GuestPortfolioRunner` inner class for unauthenticated demo visitors.
+
+1. In Setup, open **Digital Experiences** > **Settings**, enable Digital Experiences, and save.
+2. Create a site under **All Sites** > **New** using the Build Your Own (Aura or LWR) template.
+3. In **Administration** > **Preferences**, enable **Give access to public API requests on Chatter**.
+4. In Experience Builder **Settings** > **General**, enable Public Access, open the Guest User Profile, and grant access to `B2BOrderConsoleController` under **Enabled Apex Class Access**.
+5. Drag `b2bOrderConsoleWorkspace` onto the page region and publish the site.
 
 ---
 
-## 7. End-to-End QA & Live Demo Test Guide
+## 7. End-to-End QA Walkthrough
 
-See the complete step-by-step interactive walkthrough in **[docs/END_TO_END_QA_GUIDE.md](docs/END_TO_END_QA_GUIDE.md)** for testing every positive, negative, live ERP callout, Platform Event streaming, and bulk scenario.
+See [docs/END_TO_END_QA_GUIDE.md](docs/END_TO_END_QA_GUIDE.md) for the step-by-step verification checklist covering catalog seeding, filtering, Named Credential ERP callouts, Platform Event confirmations, order lifecycle transitions, negative validation rules, and 210-record bulk tests.
