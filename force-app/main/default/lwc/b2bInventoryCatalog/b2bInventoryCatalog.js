@@ -26,6 +26,8 @@ export default class B2bInventoryCatalog extends LightningElement {
     wiredCatalogResult;
     subscription = null;
     searchTimeout;
+    resizeObserver = null;
+    resizeTimeout = null;
 
     statusOptions = [
         { label: 'All Stock Statuses', value: 'All' },
@@ -62,6 +64,9 @@ export default class B2bInventoryCatalog extends LightningElement {
                     sldsBadgeClass: this.computeSldsBadgeClass(status)
                 };
             });
+            window.requestAnimationFrame(() => {
+                this.recalculateDynamicPageSize();
+            });
         } else if (result.error) {
             this.showToast('Error Loading Catalog', this.reduceError(result.error), 'error');
         }
@@ -71,11 +76,31 @@ export default class B2bInventoryCatalog extends LightningElement {
         this.subscribeToChannel();
     }
 
+    renderedCallback() {
+        if (!this.resizeObserver) {
+            const container = this.template.querySelector('.catalog-table-container');
+            if (container && typeof ResizeObserver !== 'undefined') {
+                this.resizeObserver = new ResizeObserver(() => {
+                    window.clearTimeout(this.resizeTimeout);
+                    this.resizeTimeout = window.setTimeout(() => {
+                        this.recalculateDynamicPageSize();
+                    }, 60);
+                });
+                this.resizeObserver.observe(container);
+            }
+        }
+    }
+
     disconnectedCallback() {
         if (this.subscription) {
             unsubscribe(this.subscription);
             this.subscription = null;
         }
+        if (this.resizeObserver) {
+            this.resizeObserver.disconnect();
+            this.resizeObserver = null;
+        }
+        window.clearTimeout(this.resizeTimeout);
     }
 
     subscribeToChannel() {
@@ -237,6 +262,28 @@ export default class B2bInventoryCatalog extends LightningElement {
     async refreshCatalog() {
         if (this.wiredCatalogResult) {
             await refreshApex(this.wiredCatalogResult);
+        }
+    }
+
+    recalculateDynamicPageSize() {
+        const container = this.template.querySelector('.catalog-table-container');
+        if (!container) {
+            return;
+        }
+        const clientHeight = container.clientHeight;
+        if (clientHeight <= 0) {
+            return;
+        }
+        const thead = container.querySelector('thead');
+        const headerHeight = thead ? thead.offsetHeight : 34;
+        const availableHeight = clientHeight - headerHeight;
+        const rowHeight = 34;
+        const computedSize = Math.max(6, Math.floor(availableHeight / rowHeight));
+        if (computedSize !== this.pageSize) {
+            this.pageSize = computedSize;
+            if (this.currentPage > this.totalPages) {
+                this.currentPage = Math.max(1, this.totalPages);
+            }
         }
     }
 
